@@ -55,5 +55,40 @@
 .local-footer section>b{font-size:13px}
 .local-footer section>a,.local-footer>div p{font-size:12px}
 .local-footer>small{font-size:11px}
-@media(max-width:700px){#home .site-header nav{font-size:14px}#home .hero-description{font-size:15px}#home .highlight-card p,#home .feature-card p,#home .offer-card p{font-size:12px}#home .footer-bottom{font-size:10px}}
-@media(max-width:480px){.local-header nav{font-size:12px}.local-hero>p,.local-page-heading>p,.form-page>div>p{font-size:15px}.local-card p,.article-page p,.help-faqs details p{font-size:13px}}
+@media (max-width: 700px) {
+  #home .site-header nav {
+    font-size: 14px;
+  }
+
+  #home .hero-description {
+    font-size: 15px;
+  }
+
+  #home .highlight-card p,
+  #home .feature-card p,
+  #home .offer-card p {
+    font-size: 12px;
+  }
+
+  #home .footer-bottom {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .local-header nav {
+    font-size: 12px;
+  }
+
+  .local-hero > p,
+  .local-page-heading > p,
+  .form-page > div > p {
+    font-size: 15px;
+  }
+
+  .local-card p,
+  .article-page p,
+  .help-faqs details p {
+    font-size: 13px;
+  }
+}
