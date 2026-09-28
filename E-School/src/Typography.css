@@ -1,0 +1,59 @@
+:root{font-size:17px}
+#home .announcement{font-size:13px}
+#home .site-header nav{font-size:14px}
+#home .button-nav,#home .button-primary,#home .button-light{font-size:14px}
+#home .hero .eyebrow{font-size:12px}
+#home .hero-description{font-size:16px;line-height:1.8}
+#home .watch-link{font-size:14px}
+#home .hero-proof b{font-size:12px}
+#home .hero-proof small{font-size:11px}
+#home .trust-inner>p{font-size:14px}
+#home .section-kicker{font-size:11px}
+#home .section-heading>p,#home .platform-copy>p{font-size:15px}
+#home .highlight-card h3{font-size:17px}
+#home .highlight-card p{font-size:13px}
+#home .metrics-bar small{font-size:12px}
+#home .standout-panel p{font-size:13px}
+#home .standout-panel>div>a{font-size:12px}
+#home .standout-panel li{font-size:12px}
+#home .offer-heading>p{font-size:14px}
+#home .offer-tag{font-size:10px}
+#home .offer-card p{font-size:12px}
+#home .feature-card h3{font-size:15px}
+#home .feature-card p{font-size:12px}
+#home .button-outline{font-size:13px}
+#home .quote-content h2{font-size:clamp(32px,3.1vw,42px)}
+#home .review-card blockquote{font-size:15px}
+#home .review-person b{font-size:12px}
+#home .review-person small{font-size:11px}
+#home .faq-item>button{font-size:14px}
+#home .faq-item>p{font-size:13px}
+#home .cta-card>p{font-size:14px}
+#home .cta-card>small{font-size:11px}
+#home .footer-about>p,#home .footer-newsletter>p{font-size:12px}
+#home .footer-column>b,#home .footer-newsletter>b{font-size:13px}
+#home .footer-column>a{font-size:12px}
+#home .footer-newsletter input{font-size:12px}
+#home .footer-newsletter>small{font-size:10px}
+#home .footer-bottom{font-size:11px}
+.local-page{font-size:17px}
+.local-header nav{font-size:14px}
+.local-button{font-size:14px}
+.local-hero>p,.local-page-heading>p,.form-page>div>p{font-size:16px}
+.local-eyebrow{font-size:11px}
+.local-card h3{font-size:17px}
+.local-card p{font-size:13px}
+.local-form label{font-size:12px}
+.local-form input,.local-form select,.local-form textarea,.help-search{font-size:14px}
+.form-note{font-size:12px}
+.help-faqs summary{font-size:15px}
+.help-faqs details p,.help-faqs>p{font-size:13px}
+.tutorial-list h3{font-size:16px}
+.tutorial-list p{font-size:13px}
+.article-page p{font-size:15px}
+.blog-card h3{font-size:19px}
+.local-footer section>b{font-size:13px}
+.local-footer section>a,.local-footer>div p{font-size:12px}
+.local-footer>small{font-size:11px}
+@media(max-width:700px){#home .site-header nav{font-size:14px}#home .hero-description{font-size:15px}#home .highlight-card p,#home .feature-card p,#home .offer-card p{font-size:12px}#home .footer-bottom{font-size:10px}}
+@media(max-width:480px){.local-header nav{font-size:12px}.local-hero>p,.local-page-heading>p,.form-page>div>p{font-size:15px}.local-card p,.article-page p,.help-faqs details p{font-size:13px}}
