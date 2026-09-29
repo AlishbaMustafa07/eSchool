@@ -473,6 +473,16 @@ function PricingPage() {
   )
 }
 
+const COMPANY_LEGAL = {
+  name: 'Novulabs (SMC-Private) Limited',
+  publicationDate: '2 June 2026',
+  address: 'I-10/4, I-10, Islamabad, Pakistan',
+  supportEmail: 'info@novulabs.net',
+  privacyEmail: 'info@novulabs.net',
+  website: 'https://novulabs.net',
+  secpRegNumber: null, // Pending SECP CUIN / Registration Number
+}
+
 function Placeholder({ text }) {
   return <span className="legal-placeholder">[{text}]</span>
 }
@@ -526,7 +536,7 @@ function OwnershipPage({ path }) {
         <span className="local-eyebrow">NOVU LABS SUBSCRIPTION SOFTWARE</span>
         <h1>Ownership Statement</h1>
         <p className="article-lead">
-          Novu Labs subscription software &nbsp;|&nbsp; Effective on <Placeholder text="INSERT PUBLICATION DATE" />
+          Novu Labs subscription software &nbsp;|&nbsp; Effective on {COMPANY_LEGAL.publicationDate}
         </p>
 
         <p>
@@ -535,7 +545,7 @@ function OwnershipPage({ path }) {
 
         <h2>Legal operator</h2>
         <p>
-          The website <a href="https://novulabs.net" target="_blank" rel="noopener noreferrer">https://novulabs.net</a> and the subscription products offered under the Novu Labs name are operated by <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />, a company incorporated in Pakistan, subject to verification of the exact company name and registration particulars before publication. Registered office: <Placeholder text="INSERT REGISTERED OFFICE ADDRESS" />. Company registration number: <Placeholder text="INSERT SECP REGISTRATION NUMBER" />.
+          The website <a href={COMPANY_LEGAL.website} target="_blank" rel="noopener noreferrer">{COMPANY_LEGAL.website}</a> and the subscription products offered under the Novu Labs name are operated by {COMPANY_LEGAL.name}, a company incorporated in Pakistan, subject to verification of the exact company name and registration particulars before publication. Registered office: {COMPANY_LEGAL.address}. Company registration number: {COMPANY_LEGAL.secpRegNumber ? COMPANY_LEGAL.secpRegNumber : <Placeholder text="INSERT SECP REGISTRATION NUMBER" />}.
         </p>
         <p>
           The company is the merchant and contracting supplier for subscriptions sold through its own checkout unless a product page or signed order clearly identifies another seller. Payment processing by Safepay or another gateway does not make the gateway the owner or operator of the software.
@@ -563,10 +573,10 @@ function OwnershipPage({ path }) {
 
         <h2>Contact</h2>
         <p>
-          <strong>Legal operator:</strong> <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />.<br />
-          <strong>Registered office:</strong> <Placeholder text="INSERT REGISTERED OFFICE ADDRESS" />.<br />
-          <strong>Website:</strong> <a href="https://novulabs.net" target="_blank" rel="noopener noreferrer">https://novulabs.net</a>.<br />
-          <strong>Email:</strong> <Placeholder text="INSERT WORKING SUPPORT EMAIL" />. Requests should identify the relevant product, organization and account so we can respond securely.
+          <strong>Legal operator:</strong> {COMPANY_LEGAL.name}.<br />
+          <strong>Registered office:</strong> {COMPANY_LEGAL.address}.<br />
+          <strong>Website:</strong> <a href={COMPANY_LEGAL.website} target="_blank" rel="noopener noreferrer">{COMPANY_LEGAL.website}</a>.<br />
+          <strong>Email:</strong> <a href={`mailto:${COMPANY_LEGAL.supportEmail}`}>{COMPANY_LEGAL.supportEmail}</a>. Requests should identify the relevant product, organization and account so we can respond securely.
         </p>
       </article>
     </Layout>
@@ -581,7 +591,7 @@ function RefundPolicyPage({ path }) {
         <span className="local-eyebrow">NOVU LABS SUBSCRIPTION SOFTWARE</span>
         <h1>Cancellation and Refund Policy</h1>
         <p className="article-lead">
-          Novu Labs subscription software &nbsp;|&nbsp; Effective on <Placeholder text="INSERT PUBLICATION DATE" />
+          Novu Labs subscription software &nbsp;|&nbsp; Effective on {COMPANY_LEGAL.publicationDate}
         </p>
 
         <p>
@@ -595,7 +605,7 @@ function RefundPolicyPage({ path }) {
 
         <h2>How to cancel</h2>
         <p>
-          Use the subscription account control if available or email <Placeholder text="INSERT WORKING SUPPORT EMAIL" /> from the account email with the organization, product and invoice or transaction reference. We will acknowledge the request and confirm its effective date. Cancellation stops renewal charges once processed before the next renewal; access generally continues to the end of the paid period. We will not require a reason to cancel. The customer remains responsible for charges already incurred, subject to the refund rules below and mandatory law.
+          Use the subscription account control if available or email <a href={`mailto:${COMPANY_LEGAL.supportEmail}`}>{COMPANY_LEGAL.supportEmail}</a> from the account email with the organization, product and invoice or transaction reference. We will acknowledge the request and confirm its effective date. Cancellation stops renewal charges once processed before the next renewal; access generally continues to the end of the paid period. We will not require a reason to cancel. The customer remains responsible for charges already incurred, subject to the refund rules below and mandatory law.
         </p>
 
         <h2>Refund requests</h2>
@@ -628,10 +638,10 @@ function RefundPolicyPage({ path }) {
 
         <h2>Contact</h2>
         <p>
-          <strong>Legal operator:</strong> <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />.<br />
-          <strong>Registered office:</strong> <Placeholder text="INSERT REGISTERED OFFICE ADDRESS" />.<br />
-          <strong>Website:</strong> <a href="https://novulabs.net" target="_blank" rel="noopener noreferrer">https://novulabs.net</a>.<br />
-          <strong>Email:</strong> <Placeholder text="INSERT WORKING SUPPORT EMAIL" />. Requests should identify the relevant product, organization and account so we can respond securely.
+          <strong>Legal operator:</strong> {COMPANY_LEGAL.name}.<br />
+          <strong>Registered office:</strong> {COMPANY_LEGAL.address}.<br />
+          <strong>Website:</strong> <a href={COMPANY_LEGAL.website} target="_blank" rel="noopener noreferrer">{COMPANY_LEGAL.website}</a>.<br />
+          <strong>Email:</strong> <a href={`mailto:${COMPANY_LEGAL.supportEmail}`}>{COMPANY_LEGAL.supportEmail}</a>. Requests should identify the relevant product, organization and account so we can respond securely.
         </p>
       </article>
     </Layout>
@@ -646,7 +656,7 @@ function PrivacyPolicyPage({ path }) {
         <span className="local-eyebrow">NOVU LABS SUBSCRIPTION SOFTWARE</span>
         <h1>Privacy Policy</h1>
         <p className="article-lead">
-          Novu Labs subscription software &nbsp;|&nbsp; Effective on <Placeholder text="INSERT PUBLICATION DATE" />
+          Novu Labs subscription software &nbsp;|&nbsp; Effective on {COMPANY_LEGAL.publicationDate}
         </p>
 
         <p>
@@ -655,7 +665,7 @@ function PrivacyPolicyPage({ path }) {
 
         <h2>Who handles the information</h2>
         <p>
-          <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" /> (“Novu Labs”, “we”) handles its own website, account, billing, security and support records. For records that a school, law firm, finance team or other customer enters into a subscribed product, that customer normally decides what information to collect and why; Novu Labs hosts and processes it to provide the service under the customer’s instructions. Product contracts may allocate these roles more precisely.
+          {COMPANY_LEGAL.name} (“Novu Labs”, “we”) handles its own website, account, billing, security and support records. For records that a school, law firm, finance team or other customer enters into a subscribed product, that customer normally decides what information to collect and why; Novu Labs hosts and processes it to provide the service under the customer’s instructions. Product contracts may allocate these roles more precisely.
         </p>
 
         <h2>Information we collect</h2>
@@ -709,10 +719,10 @@ function PrivacyPolicyPage({ path }) {
 
         <h2>Contact</h2>
         <p>
-          <strong>Legal operator:</strong> <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />.<br />
-          <strong>Registered office:</strong> <Placeholder text="INSERT REGISTERED OFFICE ADDRESS" />.<br />
-          <strong>Website:</strong> <a href="https://novulabs.net" target="_blank" rel="noopener noreferrer">https://novulabs.net</a>.<br />
-          <strong>Email:</strong> <Placeholder text="INSERT WORKING PRIVACY EMAIL" />. Requests should identify the relevant product, organization and account so we can respond securely.
+          <strong>Legal operator:</strong> {COMPANY_LEGAL.name}.<br />
+          <strong>Registered office:</strong> {COMPANY_LEGAL.address}.<br />
+          <strong>Website:</strong> <a href={COMPANY_LEGAL.website} target="_blank" rel="noopener noreferrer">{COMPANY_LEGAL.website}</a>.<br />
+          <strong>Email:</strong> <a href={`mailto:${COMPANY_LEGAL.privacyEmail}`}>{COMPANY_LEGAL.privacyEmail}</a>. Requests should identify the relevant product, organization and account so we can respond securely.
         </p>
       </article>
     </Layout>
@@ -727,7 +737,7 @@ function TermsPage({ path }) {
         <span className="local-eyebrow">NOVU LABS SUBSCRIPTION SOFTWARE</span>
         <h1>Terms and Conditions</h1>
         <p className="article-lead">
-          Novu Labs subscription software &nbsp;|&nbsp; Effective on <Placeholder text="INSERT PUBLICATION DATE" />
+          Novu Labs subscription software &nbsp;|&nbsp; Effective on {COMPANY_LEGAL.publicationDate}
         </p>
 
         <p>
@@ -736,7 +746,7 @@ function TermsPage({ path }) {
 
         <h2>Agreement and customer authority</h2>
         <p>
-          The contracting supplier is <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />. The person accepting these terms confirms that they can bind the customer organization. A subscription begins when the order is accepted and access is activated. The applicable order, checkout and product schedule state the product, users, features, limits, fees, term, taxes and support commitments. If there is a conflict, a signed agreement prevails for that customer, followed by the order, then these terms.
+          The contracting supplier is {COMPANY_LEGAL.name}. The person accepting these terms confirms that they can bind the customer organization. A subscription begins when the order is accepted and access is activated. The applicable order, checkout and product schedule state the product, users, features, limits, fees, term, taxes and support commitments. If there is a conflict, a signed agreement prevails for that customer, followed by the order, then these terms.
         </p>
 
         <h2>Accounts and use</h2>
@@ -797,10 +807,10 @@ function TermsPage({ path }) {
 
         <h2>Contact</h2>
         <p>
-          <strong>Legal operator:</strong> <Placeholder text="INSERT EXACT SECP REGISTERED LEGAL NAME" />.<br />
-          <strong>Registered office:</strong> <Placeholder text="INSERT REGISTERED OFFICE ADDRESS" />.<br />
-          <strong>Website:</strong> <a href="https://novulabs.net" target="_blank" rel="noopener noreferrer">https://novulabs.net</a>.<br />
-          <strong>Email:</strong> <Placeholder text="INSERT WORKING SUPPORT EMAIL" />. Requests should identify the relevant product, organization and account so we can respond securely.
+          <strong>Legal operator:</strong> {COMPANY_LEGAL.name}.<br />
+          <strong>Registered office:</strong> {COMPANY_LEGAL.address}.<br />
+          <strong>Website:</strong> <a href={COMPANY_LEGAL.website} target="_blank" rel="noopener noreferrer">{COMPANY_LEGAL.website}</a>.<br />
+          <strong>Email:</strong> <a href={`mailto:${COMPANY_LEGAL.supportEmail}`}>{COMPANY_LEGAL.supportEmail}</a>. Requests should identify the relevant product, organization and account so we can respond securely.
         </p>
       </article>
     </Layout>
