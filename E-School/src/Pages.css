@@ -25,7 +25,7 @@
 
 .local-header nav a:hover,
 .local-footer a:hover {
-  color: #613ddf;
+  color: #0B63B6;
 }
 
 .local-login {
@@ -40,7 +40,7 @@
   padding: 13px 18px;
   border: 0;
   border-radius: 8px;
-  background: #613ddf;
+  background: #0B63B6;
   color: #fff !important;
   font-size: 12px;
   font-weight: 700;
@@ -48,12 +48,12 @@
 }
 
 .local-button:hover {
-  background: #4b2bc4;
+  background: #084678;
 }
 
 .local-hero {
   min-height: 470px;
-  background: linear-gradient(120deg, #211747, #2b1a5e);
+  background: linear-gradient(120deg, #062B4C 0%, #0B63B6 100%);
   color: #fff;
   padding: 86px max(30px, calc((100vw - 1040px) / 2));
   position: relative;
@@ -174,7 +174,7 @@
   height: 48px;
   margin-top: 12px;
   border-radius: 7px;
-  background: linear-gradient(180deg, #eeeaff, #fff);
+  background: linear-gradient(180deg, #EAF3FB, #fff);
   display: flex;
   align-items: end;
   gap: 10px;
@@ -251,8 +251,8 @@
   border-radius: 10px;
   display: grid;
   place-items: center;
-  background: #eeeaff;
-  color: #7053df;
+  background: #EAF3FB;
+  color: #0B63B6;
   font-size: 15px;
   font-weight: 700;
   margin-bottom: 17px;
@@ -349,8 +349,8 @@
 .local-form select:focus,
 .local-form textarea:focus,
 .help-search:focus {
-  border-color: #8b75e7;
-  box-shadow: 0 0 0 3px #eeeaff;
+  border-color: #0B63B6;
+  box-shadow: 0 0 0 3px #EAF3FB;
 }
 
 .local-form textarea {
@@ -399,7 +399,7 @@
 }
 
 .help-faqs a {
-  color: #613ddf;
+  color: #0B63B6;
 }
 
 .tutorial-list {
@@ -416,7 +416,7 @@
 
 .tutorial-list article > span {
   font: 700 20px Manrope, sans-serif;
-  color: #9a86e9;
+  color: #0B63B6;
 }
 
 .tutorial-list h3 {
@@ -464,6 +464,16 @@
 .article-page .text-link {
   display: inline-block;
   margin-top: 18px;
+}
+
+.legal-placeholder {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 600;
+  border: 1px dashed #F59E0B;
+  font-size: 0.9em;
 }
 
 .blog-card {
@@ -564,7 +574,7 @@
   width: 29px;
   height: 29px;
   border-radius: 9px;
-  background: #613ddf;
+  background: #0B63B6;
   color: #fff;
   display: grid;
   place-items: center;
@@ -575,7 +585,7 @@
 
 .local-page .local-header .brand-dot,
 .local-page .local-footer .brand-dot {
-  color: #f47d69;
+  color: #0B63B6;
 }
 
 .local-page .local-header .brand,
@@ -585,7 +595,7 @@
   gap: 9px;
   font: 800 22px Manrope, sans-serif;
   letter-spacing: -1px;
-  color: #282546;
+  color: #0B1F33;
   text-decoration: none;
 }
 
@@ -593,7 +603,7 @@
   width: 29px;
   height: 29px;
   border-radius: 9px;
-  background: #613ddf;
+  background: #0B63B6;
   color: #fff;
   display: grid;
   place-items: center;

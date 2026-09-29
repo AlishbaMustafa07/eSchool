@@ -57,14 +57,14 @@
   font-size: 8px;
   font-weight: 700;
   color: #fff;
-  background: #775be9;
+  background: #0B63B6;
   border-radius: 4px;
   padding: 3px 6px;
 }
 
 .nav-popover em.paid {
-  background: #eeeaff;
-  color: #7156d7;
+  background: #EAF3FB;
+  color: #0B63B6;
 }
 
 .nav-popover-small {
@@ -255,13 +255,13 @@
   position: relative;
   background: radial-gradient(
     ellipse at 75% 45%,
-    #382375 0%,
-    transparent 52%
+    rgba(11, 99, 182, 0.45) 0%,
+    transparent 55%
   ), linear-gradient(
     115deg,
-    #211747 0%,
-    #281956 55%,
-    #211546 100%
+    #041D33 0%,
+    #062B4C 55%,
+    #0B1F33 100%
   );
   color: #fff;
   isolation: isolate;
@@ -434,7 +434,7 @@
 }
 
 .offer-heading h2 span {
-  color: #613ddf;
+  color: #0B63B6;
 }
 
 .offer-heading > p {
