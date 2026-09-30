@@ -44,7 +44,7 @@ function Dashboard() {
       </div>
       <div className="dashboard">
         <aside className="dash-side">
-          <div className="mini-logo"><span>E</span></div>
+          <div className="mini-logo"><img src="/logo.png" alt="EduCore logo" /></div>
           <div className="side-active">▦</div>
           <i>✎</i><i>◷</i><i>♧</i><i>⌁</i><i>⚙</i>
         </aside>
