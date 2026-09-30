@@ -54,6 +54,13 @@ export default function Footer() {
             <a className="footer-contact" href="/contact">Speak with a NovuLabs Consultant</a>
           </div>
         </div>
+        <div className="footer-payment-trust">
+          <span className="trust-safepay-tag">🛡️ Payments Secured by <strong>Safepay</strong> (State Bank Regulated)</span>
+          <span className="payment-badges-list">
+            <span>Visa</span> • <span>Mastercard</span> • <span>PayPak</span> • <span>EasyPaisa</span> • <span>JazzCash</span> • <span>1LINK</span>
+          </span>
+        </div>
+
         <div className="footer-bottom">
           <span>© {new Date().getFullYear()} NovuLabs EduCore. All rights reserved.</span>
           <div>
