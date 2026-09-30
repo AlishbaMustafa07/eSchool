@@ -511,9 +511,68 @@
   margin: 0;
 }
 
+.pricing-controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  margin: 10px auto 32px;
+}
+
+.pricing-pill-group {
+  display: inline-flex;
+  background: #EAF3FB;
+  padding: 4px;
+  border-radius: 999px;
+  border: 1px solid #C8D5E3;
+}
+
+.pricing-pill-btn {
+  border: none;
+  background: transparent;
+  color: #062B4C;
+  font: 600 13px Manrope, sans-serif;
+  padding: 6px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pricing-pill-btn.active {
+  background: #0B63B6;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(11, 99, 182, 0.25);
+}
+
+.pricing-pill-badge {
+  background: #10B981;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  margin-left: 6px;
+}
+
 .pricing-card h2 {
-  font: 700 22px Manrope, sans-serif;
-  margin: 5px 0 12px;
+  font: 700 24px Manrope, sans-serif;
+  color: #0B1F33;
+  margin: 8px 0 10px;
+}
+
+.pricing-card h2 small {
+  font-size: 13px;
+  font-weight: 500;
+  color: #718096;
+}
+
+.pricing-period-note {
+  font-size: 11px;
+  color: #10B981;
+  font-weight: 600;
+  margin-top: -4px;
+  margin-bottom: 8px;
 }
 
 .pricing-card ul {

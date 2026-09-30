@@ -399,75 +399,180 @@ function AboutPage() {
 }
 
 function PricingPage() {
+  const [billing, setBilling] = useState('monthly')
+  const [currency, setCurrency] = useState('PKR')
+
+  const plans = [
+    {
+      key: 'starter',
+      eyebrow: 'STARTER CAMPUS',
+      pkrMonthly: '4,999',
+      pkrAnnual: '3,999',
+      usdMonthly: '19',
+      usdAnnual: '15',
+      desc: 'Essential digital operations for growing academies replacing manual registers.',
+      features: [
+        'Up to 300 Enrolled Students',
+        'Core SIS & Admin Workspace',
+        'Biometric & QR Attendance Grid',
+        'Digital Daily Diary & Notes',
+        'Standard PDF Report Cards',
+        'Standard Email & WhatsApp Support'
+      ],
+      ctaText: 'Start 14-Day Free Pilot →',
+      ctaHref: '/signup',
+      highlighted: false,
+    },
+    {
+      key: 'growth',
+      eyebrow: 'MOST POPULAR • GROWTH ACADEMY',
+      pkrMonthly: '9,999',
+      pkrAnnual: '7,999',
+      usdMonthly: '39',
+      usdAnnual: '29',
+      desc: 'The complete AI-powered operating system for progressive K-12 schools.',
+      features: [
+        'Up to 1,200 Enrolled Students',
+        'All Features in Starter Campus',
+        'AI Question & Smart Exam Generator',
+        'Next-Gen LMS with Video Lessons',
+        'Islamic Studies & Hifz Tracker',
+        'Automated WhatsApp / SMS Alerts',
+        'Smart Digital Library with Barcodes',
+        'Priority 24/7 Phone & WhatsApp Support'
+      ],
+      ctaText: 'Deploy Growth Plan →',
+      ctaHref: '/signup',
+      highlighted: true,
+    },
+    {
+      key: 'enterprise',
+      eyebrow: 'ENTERPRISE UNIFIED',
+      pkrMonthly: '19,999',
+      pkrAnnual: '15,999',
+      usdMonthly: '79',
+      usdAnnual: '59',
+      desc: 'Advanced multi-campus governance, custom board analytics, and priority engineering.',
+      features: [
+        'Up to 3,500 Enrolled Students',
+        'All Features in Growth Academy',
+        'Multi-Campus Central HQ Dashboard',
+        'STEAM & Future Skills Portfolio Engine',
+        'Custom Report Card Template Engine',
+        'Biometric Hardware Direct Local API Sync',
+        'Dedicated Account Success Manager'
+      ],
+      ctaText: 'Schedule Consultation →',
+      ctaHref: '/signup',
+      highlighted: false,
+    },
+    {
+      key: 'custom',
+      eyebrow: 'DISTRICT & GOVERNMENT',
+      customPrice: true,
+      desc: 'Tailored sovereign cloud or on-premises deployment for large school networks.',
+      features: [
+        'Unlimited Campuses & Students',
+        'Dedicated Private Sovereign Cloud',
+        'Custom Ministry & Board Compliance',
+        'Bespoke Localized AI Models',
+        '24/7 Dedicated Senior Engineering Team'
+      ],
+      ctaText: 'Request Institutional RFP →',
+      ctaHref: '/contact',
+      highlighted: false,
+    }
+  ]
+
   return (
     <Layout>
       <section className="local-page-heading">
         <span className="local-eyebrow">INSTITUTIONAL SAAS PLANS</span>
         <h1>Transparent subscription tiers for every campus size.</h1>
-        <p>Predictable monthly and annual pricing with zero hidden fees and free Excel data migration.</p>
+        <p>Predictable monthly and annual pricing starting from PKR 4,999 with zero hidden fees and free Excel data migration.</p>
       </section>
+
+      <div className="pricing-controls">
+        <div className="pricing-pill-group" role="group" aria-label="Billing frequency">
+          <button
+            type="button"
+            className={`pricing-pill-btn ${billing === 'monthly' ? 'active' : ''}`}
+            onClick={() => setBilling('monthly')}
+          >
+            Monthly Billing
+          </button>
+          <button
+            type="button"
+            className={`pricing-pill-btn ${billing === 'annual' ? 'active' : ''}`}
+            onClick={() => setBilling('annual')}
+          >
+            Annual Billing <span className="pricing-pill-badge">Save 20%</span>
+          </button>
+        </div>
+
+        <div className="pricing-pill-group" role="group" aria-label="Currency selector">
+          <button
+            type="button"
+            className={`pricing-pill-btn ${currency === 'PKR' ? 'active' : ''}`}
+            onClick={() => setCurrency('PKR')}
+          >
+            PKR (Rs.)
+          </button>
+          <button
+            type="button"
+            className={`pricing-pill-btn ${currency === 'USD' ? 'active' : ''}`}
+            onClick={() => setCurrency('USD')}
+          >
+            USD ($)
+          </button>
+        </div>
+      </div>
+
       <section className="local-content local-card-grid">
-        <article className="local-card pricing-card">
-          <span className="local-eyebrow">STARTER CAMPUS</span>
-          <h2>$149 <small>/ month</small></h2>
-          <p>Essential digital operations for growing academies replacing paper registers.</p>
-          <ul>
-            <li>Up to 300 Enrolled Students</li>
-            <li>Core SIS & Admin Workspace</li>
-            <li>Biometric & QR Attendance Grid</li>
-            <li>Digital Daily Diary & Notes</li>
-            <li>Standard PDF Report Cards</li>
-            <li>Standard Email & Ticket Support</li>
-          </ul>
-          <a className="local-button" href="/signup">Start 14-Day Free Pilot →</a>
-        </article>
+        {plans.map(plan => {
+          let priceDisplay = 'Custom Pricing'
+          if (!plan.customPrice) {
+            const amount = currency === 'PKR'
+              ? (billing === 'monthly' ? plan.pkrMonthly : plan.pkrAnnual)
+              : (billing === 'monthly' ? plan.usdMonthly : plan.usdAnnual)
+            const prefix = currency === 'PKR' ? 'PKR ' : '$'
+            priceDisplay = `${prefix}${amount}`
+          }
 
-        <article className="local-card pricing-card" style={{ border: '2px solid #0B63B6' }}>
-          <span className="local-eyebrow" style={{ color: '#0B63B6', fontWeight: 800 }}>MOST POPULAR • GROWTH ACADEMY</span>
-          <h2>$349 <small>/ month</small></h2>
-          <p>The complete AI-powered operating system for progressive K-12 schools.</p>
-          <ul>
-            <li>Up to 1,200 Enrolled Students</li>
-            <li>All Features in Starter Campus</li>
-            <li>AI Question & Smart Exam Generator</li>
-            <li>Next-Gen LMS with Video Lessons</li>
-            <li>Islamic Studies & Hifz Tracker</li>
-            <li>Automated WhatsApp / SMS Alerts</li>
-            <li>Smart Digital Library with Barcodes</li>
-            <li>Priority 24/7 Phone & WhatsApp Support</li>
-          </ul>
-          <a className="local-button" href="/signup" style={{ background: '#0B63B6', color: '#fff' }}>Deploy Growth Plan →</a>
-        </article>
-
-        <article className="local-card pricing-card">
-          <span className="local-eyebrow">ENTERPRISE UNIFIED</span>
-          <h2>$699 <small>/ month</small></h2>
-          <p>Advanced multi-campus governance, custom board analytics, and priority engineering.</p>
-          <ul>
-            <li>Up to 3,500 Enrolled Students</li>
-            <li>All Features in Growth Academy</li>
-            <li>Multi-Campus Central HQ Dashboard</li>
-            <li>STEAM & Future Skills Portfolio Engine</li>
-            <li>Custom Report Card Template Engine</li>
-            <li>Biometric Hardware Direct Local API Sync</li>
-            <li>Dedicated Account Success Manager</li>
-          </ul>
-          <a className="local-button" href="/signup">Schedule Consultation →</a>
-        </article>
-
-        <article className="local-card pricing-card">
-          <span className="local-eyebrow">DISTRICT & GOVERNMENT</span>
-          <h2>Custom Pricing</h2>
-          <p>Tailored sovereign cloud or on-premises deployment for large school networks.</p>
-          <ul>
-            <li>Unlimited Campuses & Students</li>
-            <li>Dedicated Private Sovereign Cloud</li>
-            <li>Custom Ministry & Board Compliance</li>
-            <li>Bespoke Localized AI Models</li>
-            <li>24/7 Dedicated Senior Engineering Team</li>
-          </ul>
-          <a className="local-button" href="/contact">Request Institutional RFP →</a>
-        </article>
+          return (
+            <article
+              key={plan.key}
+              className="local-card pricing-card"
+              style={plan.highlighted ? { border: '2px solid #0B63B6', position: 'relative' } : undefined}
+            >
+              <span
+                className="local-eyebrow"
+                style={plan.highlighted ? { color: '#0B63B6', fontWeight: 800 } : undefined}
+              >
+                {plan.eyebrow}
+              </span>
+              <h2>
+                {priceDisplay} {!plan.customPrice && <small>/ month</small>}
+              </h2>
+              {!plan.customPrice && billing === 'annual' && (
+                <div className="pricing-period-note">Billed annually (20% savings)</div>
+              )}
+              <p>{plan.desc}</p>
+              <ul>
+                {plan.features.map(f => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+              <a
+                className="local-button"
+                href={plan.ctaHref}
+                style={plan.highlighted ? { background: '#0B63B6', color: '#fff' } : undefined}
+              >
+                {plan.ctaText}
+              </a>
+            </article>
+          )
+        })}
       </section>
     </Layout>
   )
