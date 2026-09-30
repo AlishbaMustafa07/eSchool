@@ -48,8 +48,8 @@
 }
 
 .nav-popover > a:hover {
-  background: #f6f4fc;
-  color: #6e52dc;
+  background: #EAF3FB;
+  color: #0B63B6;
 }
 
 .nav-popover em {
@@ -93,7 +93,7 @@
 .standout-panel > div > a {
   font-size: 10px;
   font-weight: 700;
-  color: #7258d6;
+  color: #0B63B6;
 }
 
 .standout-panel > div > a span {
@@ -158,7 +158,7 @@
 .faq-item > button i {
   font-style: normal;
   font-size: 19px;
-  color: #775be9;
+  color: #0B63B6;
 }
 
 .faq-item > p {
@@ -170,7 +170,7 @@
 }
 
 .faq-active > button {
-  color: #6e52dc;
+  color: #0B63B6;
 }
 
 .footer-contact {
@@ -292,7 +292,7 @@
 }
 
 .hero .eyebrow {
-  color: #d2c9f4;
+  color: #93C5FD;
   gap: 9px;
   margin-bottom: 21px;
   letter-spacing: .1em;
@@ -309,10 +309,10 @@
   place-items: center;
   width: 17px;
   height: 17px;
-  border: 1px solid #a995f0;
+  border: 1px solid #60A5FA;
   border-radius: 50%;
   font-size: 10px;
-  color: #c5b8ff;
+  color: #93C5FD;
 }
 
 .hero h1 {
@@ -323,15 +323,15 @@
 }
 
 .hero .highlight-word {
-  color: #c2aeff;
+  color: #60A5FA;
 }
 
 .hero .highlight-word:after {
-  background-image: url("data:image/svg+xml,%3Csvg width='220' height='10' viewBox='0 0 220 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 7C58 1 161 0 218 5' stroke='%23f58a73' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='220' height='10' viewBox='0 0 220 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 7C58 1 161 0 218 5' stroke='%230B63B6' stroke-width='3' stroke-linecap='round' fill='none'/%3E%3C/svg%3E");
 }
 
 .hero-description {
-  color: #ddd8ef;
+  color: #E2E8F0;
   font-size: 14px;
   max-width: 440px;
 }
@@ -341,24 +341,24 @@
 }
 
 .hero-proof small {
-  color: #c1b9db;
+  color: #94A3B8;
 }
 
 .hero .watch-link {
-  color: #f4f1ff;
+  color: #F8FAFC;
 }
 
 .hero .play-icon {
-  border-color: #8b77c9;
-  color: #e5dcff;
+  border-color: #3B82F6;
+  color: #93C5FD;
 }
 
 .hero-spark {
-  color: #ff9e86;
+  color: #60A5FA;
 }
 
 .hero-spark.spark-b {
-  color: #c1aaff;
+  color: #38BDF8;
 }
 
 /* Trust strip */
@@ -497,10 +497,26 @@
   font-size: 8px;
   font-weight: 800;
   letter-spacing: .08em;
-  color: #5c42bf;
+  color: #0B63B6;
   background: #fff9;
   padding: 6px 8px;
   border-radius: 20px;
+}
+
+.offer-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 12px;
+  font: 700 11px Manrope, sans-serif;
+  color: #0B63B6;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.offer-action:hover {
+  color: #062B4C;
+  transform: translateX(3px);
 }
 
 .offer-card img {

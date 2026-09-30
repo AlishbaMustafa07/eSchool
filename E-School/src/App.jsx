@@ -268,30 +268,35 @@ function HomePage() {
               <span className="offer-tag">PORTAL 01 • CAMPUS LEADERSHIP</span>
               <h3>Admin & Principal<br/>Command Center.</h3>
               <p>Admissions pipeline, master timetable scheduling, library circulation, teacher attendance, and campus-wide chat monitoring.</p>
+              <a className="offer-action" href="/products/basic">Explore Admin Portal <span>→</span></a>
               <img src="/illustrations/people.svg" alt="Admin Portal Command Center" loading="lazy"/>
             </article>
             <article className="offer-card offer-chat">
               <span className="offer-tag">PORTAL 02 • FACULTY COCKPIT</span>
               <h3>Teacher Workspace<br/>& AI Exam Suite.</h3>
               <p>Mark 35 students in 15 seconds, generate Bloom-calibrated exam papers, assign digital diary, and manage student grading.</p>
+              <a className="offer-action" href="/products/desktop">Explore Teacher Cockpit <span>→</span></a>
               <img src="/illustrations/classroom.svg" alt="Teacher Workspace and AI Exam Suite" loading="lazy"/>
             </article>
             <article className="offer-card offer-reports">
               <span className="offer-tag">PORTAL 03 • LEARNER EXPERIENCE</span>
               <h3>Student Learning<br/>& Skills Hub.</h3>
               <p>Video courses, lesson attachments, homework submission, timetable countdowns, Islamic studies, and STEAM portfolio badges.</p>
+              <a className="offer-action" href="/products/lms">Explore Student Hub <span>→</span></a>
               <img src="/illustrations/reports.svg" alt="Student Learning and Skills Hub" loading="lazy"/>
             </article>
             <article className="offer-card offer-sms">
               <span className="offer-tag">PORTAL 04 • FAMILY COMPANION</span>
               <h3>Parent Portal &<br/>WhatsApp Alerts.</h3>
               <p>Instant school gate entry alerts, daily homework diary with teacher remarks, PTM schedule bookings, and direct teacher line.</p>
+              <a className="offer-action" href="/products/mobile-apps">Explore Parent Portal <span>→</span></a>
               <img src="/illustrations/messages.svg" alt="Parent Portal and WhatsApp Alerts" loading="lazy"/>
             </article>
             <article className="offer-card offer-live">
               <span className="offer-tag">CORE ENGINE • AI & VALUES</span>
               <h3>Smart AI Exams &<br/>Ayah-Level Tarbiyah.</h3>
               <p>Advanced AI assessment engine paired with Quranic Hifz tracker, Tajweed milestones, and moral Akhlaq logs.</p>
+              <a className="offer-action" href="/products/pro">Explore AI Assessments <span>→</span></a>
               <img src="/illustrations/chat.svg" alt="AI Exams and Tarbiyah Engine" loading="lazy"/>
             </article>
           </div>
