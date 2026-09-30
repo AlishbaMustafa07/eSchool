@@ -85,36 +85,11 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
       return
     }
 
-    if (paymentChannel === 'card') {
-      if (cleanCard.length < 15) {
-        setErrorMsg('Please enter a valid 16-digit card number.')
-        return
-      }
-      if (!cardHolder.trim()) {
-        setErrorMsg('Please enter the name on your card.')
-        return
-      }
-      if (cardExpiry.length < 5) {
-        setErrorMsg('Please enter a valid expiry date (MM/YY).')
-        return
-      }
-      if (cardCvv.length < 3) {
-        setErrorMsg('Please enter a valid 3 or 4 digit CVV/CVC.')
-        return
-      }
-    } else if (paymentChannel === 'wallet') {
-      if (!walletPhone.trim() || walletPhone.replace(/\D/g, '').length < 11) {
-        setErrorMsg(`Please enter a valid 11-digit ${walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} mobile number.`)
-        return
-      }
-    }
-
     setLoading(true)
 
-    const last4 = cleanCard ? cleanCard.slice(-4) : (walletPhone ? walletPhone.slice(-4) : '1010')
     const channelDisplay = paymentChannel === 'card'
-      ? `${cardBrand} ending in ${last4}`
-      : (paymentChannel === 'wallet' ? `${walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} (${walletPhone})` : `1LINK Direct (${bankName})`)
+      ? 'Debit / Credit Card (Visa, Mastercard, PayPak)'
+      : (paymentChannel === 'wallet' ? 'Mobile Wallet (EasyPaisa, JazzCash)' : `1LINK Direct (${bankName})`)
 
     const payload = {
       plan_key: plan.key,
@@ -124,8 +99,6 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
       email: email.trim(),
       phone: phone.trim() || walletPhone.trim(),
       city: city.trim(),
-      card_brand: cardBrand,
-      card_last4: last4,
       payment_channel_name: channelDisplay,
       redirect_url: `${window.location.origin}/checkout/success`,
       cancel_url: `${window.location.origin}/checkout/cancel`
@@ -372,117 +345,30 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
                 </button>
               </div>
 
-              {/* DYNAMIC PAYMENT DETAILS FORM */}
+              {/* DYNAMIC PAYMENT DETAILS / GATEWAY INFORMATION */}
               {paymentChannel === 'card' && (
                 <div className="payment-details-box card-box">
                   <div className="card-box-header">
-                    <span className="card-box-title">Cardholder Payment Information</span>
-                    <span className="card-brand-badge">{cardIcon}</span>
+                    <span className="card-box-title">💳 Safepay Official Card Gateway</span>
+                    <span className="card-brand-badge">Visa • Mastercard • PayPak</span>
                   </div>
-
-                  <div className="safepay-input-group" style={{ marginBottom: '14px' }}>
-                    <label htmlFor="sp-card-num">Card Number *</label>
-                    <div className="input-with-icon">
-                      <input
-                        id="sp-card-num"
-                        type="text"
-                        required
-                        placeholder="•••• •••• •••• ••••"
-                        value={cardNumber}
-                        onChange={handleCardNumberChange}
-                        maxLength={19}
-                        autoComplete="cc-number"
-                      />
-                      <span className="input-badge">{cardBrand}</span>
-                    </div>
-                  </div>
-
-                  <div className="safepay-input-group" style={{ marginBottom: '14px' }}>
-                    <label htmlFor="sp-card-name">Cardholder Name *</label>
-                    <input
-                      id="sp-card-name"
-                      type="text"
-                      required
-                      placeholder="NAME AS PRINTED ON CARD"
-                      value={cardHolder}
-                      onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
-                      autoComplete="cc-name"
-                    />
-                  </div>
-
-                  <div className="form-grid-2">
-                    <div className="safepay-input-group">
-                      <label htmlFor="sp-card-exp">Expiry Date (MM/YY) *</label>
-                      <input
-                        id="sp-card-exp"
-                        type="text"
-                        required
-                        placeholder="MM / YY"
-                        value={cardExpiry}
-                        onChange={handleExpiryChange}
-                        maxLength={5}
-                        autoComplete="cc-exp"
-                      />
-                    </div>
-
-                    <div className="safepay-input-group">
-                      <label htmlFor="sp-card-cvv">Security Code (CVV) *</label>
-                      <input
-                        id="sp-card-cvv"
-                        type="password"
-                        required
-                        placeholder="•••"
-                        value={cardCvv}
-                        onChange={handleCvvChange}
-                        maxLength={4}
-                        autoComplete="cc-csc"
-                      />
-                    </div>
-                  </div>
-
-                  <p className="card-security-note">
-                    🔒 3D Secure OTP verification will be required on the next step. Card details are transmitted encrypted directly to Safepay.
+                  <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#1E293B', lineHeight: '1.5' }}>
+                    Clicking below will securely redirect you to <strong>Safepay's official checkout page</strong>. You will enter your card details directly on Safepay with State Bank 3D Secure verification, and the payment will be recorded live in your Safepay Merchant Dashboard.
                   </p>
+                  <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', padding: '10px 14px', borderRadius: '8px', fontSize: '12px', color: '#1E40AF' }}>
+                    💡 <strong>Sandbox Test Card:</strong> <code>5123 4567 8901 2345</code> | Expiry: <code>12/28</code> | CVV: <code>123</code> | OTP: <code>1234</code>
+                  </div>
                 </div>
               )}
 
               {paymentChannel === 'wallet' && (
                 <div className="payment-details-box wallet-box">
                   <div className="card-box-header">
-                    <span className="card-box-title">Mobile Account Information</span>
+                    <span className="card-box-title">📱 Mobile Account (EasyPaisa / JazzCash)</span>
+                    <span className="card-brand-badge">Instant Mobile Debit</span>
                   </div>
-
-                  <div className="wallet-toggle-row">
-                    <button
-                      type="button"
-                      className={`wallet-choice-btn ${walletProvider === 'easypaisa' ? 'active' : ''}`}
-                      onClick={() => setWalletProvider('easypaisa')}
-                    >
-                      🟢 EasyPaisa
-                    </button>
-                    <button
-                      type="button"
-                      className={`wallet-choice-btn ${walletProvider === 'jazzcash' ? 'active' : ''}`}
-                      onClick={() => setWalletProvider('jazzcash')}
-                    >
-                      🔴 JazzCash
-                    </button>
-                  </div>
-
-                  <div className="safepay-input-group" style={{ marginTop: '14px' }}>
-                    <label htmlFor="sp-wallet-phone">{walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} Mobile Number *</label>
-                    <input
-                      id="sp-wallet-phone"
-                      type="tel"
-                      required
-                      placeholder="03XX XXXXXXX"
-                      value={walletPhone}
-                      onChange={(e) => setWalletPhone(e.target.value)}
-                    />
-                  </div>
-
-                  <p className="card-security-note">
-                    📱 An approval push notification or USSD authorization will be sent to this phone number to confirm PKR {totalAmount.toLocaleString()}.
+                  <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#1E293B', lineHeight: '1.5' }}>
+                    Select your mobile wallet on Safepay's hosted checkout to approve the transaction via USSD push or mobile app notification.
                   </p>
                 </div>
               )}
@@ -490,30 +376,11 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
               {paymentChannel === 'bank' && (
                 <div className="payment-details-box bank-box">
                   <div className="card-box-header">
-                    <span className="card-box-title">1LINK Direct Bank Transfer</span>
+                    <span className="card-box-title">🏦 1LINK / Raast Direct Transfer</span>
+                    <span className="card-brand-badge">1Bill Consumer Voucher</span>
                   </div>
-
-                  <div className="safepay-input-group">
-                    <label htmlFor="sp-bank-select">Select Your Bank</label>
-                    <select
-                      id="sp-bank-select"
-                      className="bank-select"
-                      value={bankName}
-                      onChange={(e) => setBankName(e.target.value)}
-                    >
-                      <option value="HBL">Habib Bank Limited (HBL)</option>
-                      <option value="Meezan">Meezan Bank</option>
-                      <option value="Alfalah">Bank Alfalah</option>
-                      <option value="MCB">MCB Bank</option>
-                      <option value="Faysal">Faysal Bank</option>
-                      <option value="UBL">United Bank Limited (UBL)</option>
-                      <option value="Allied">Allied Bank Limited</option>
-                      <option value="StandardChartered">Standard Chartered Pakistan</option>
-                    </select>
-                  </div>
-
-                  <p className="card-security-note">
-                    🏦 An automated 1LINK 1Bill institutional invoice consumer ID will be generated upon confirmation for your finance department.
+                  <p style={{ margin: '0 0 10px', fontSize: '13px', color: '#1E293B', lineHeight: '1.5' }}>
+                    Safepay will issue a dynamic 1LINK 1Bill reference for instant real-time settlement via online banking or ATM.
                   </p>
                 </div>
               )}
