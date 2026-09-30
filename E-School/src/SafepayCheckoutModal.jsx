@@ -624,6 +624,18 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
                   ← Back
                 </button>
               </div>
+
+              {createdOrder && createdOrder.checkout_url && (
+                <div style={{ textAlign: 'center', marginTop: '16px', paddingTop: '14px', borderTop: '1px dashed #CBD5E1' }}>
+                  <a
+                    href={createdOrder.checkout_url}
+                    className="text-link"
+                    style={{ fontSize: '13px', color: '#0B63B6', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <span>Or pay directly on Safepay hosted checkout page ↗</span>
+                  </a>
+                </div>
+              )}
             </form>
           </div>
         )}
