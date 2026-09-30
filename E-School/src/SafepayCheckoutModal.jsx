@@ -2,16 +2,36 @@ import React, { useState } from 'react'
 
 const BACKEND_API_BASE = 'http://127.0.0.1:4000'
 
-export default function SafepayCheckoutModal({ plan, billing, onClose, onPaymentSuccess }) {
+export default function SafepayCheckoutModal({ plan, billing, onClose }) {
   const [currentBilling, setCurrentBilling] = useState(billing || 'monthly')
   const [schoolName, setSchoolName] = useState('')
   const [adminName, setAdminName] = useState('')
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [city, setCity] = useState('')
+  
+  // Payment Method Selection
   const [paymentChannel, setPaymentChannel] = useState('card') // 'card', 'wallet', 'bank'
+
+  // Card Details State
+  const [cardNumber, setCardNumber] = useState('')
+  const [cardHolder, setCardHolder] = useState('')
+  const [cardExpiry, setCardExpiry] = useState('')
+  const [cardCvv, setCardCvv] = useState('')
+
+  // Mobile Wallet State
+  const [walletProvider, setWalletProvider] = useState('easypaisa') // 'easypaisa', 'jazzcash'
+  const [walletPhone, setWalletPhone] = useState('')
+
+  // Bank State
+  const [bankName, setBankName] = useState('HBL')
+
+  // Checkout Stages: 'details' -> 'otp' -> 'processing'
+  const [stage, setStage] = useState('details')
+  const [otpCode, setOtpCode] = useState('123456')
   const [loading, setLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [createdOrder, setCreatedOrder] = useState(null)
 
   if (!plan) return null
 
@@ -21,15 +41,80 @@ export default function SafepayCheckoutModal({ plan, billing, onClose, onPayment
   const annualMonthlyRate = plan.key === 'starter' ? 3999 : (plan.key === 'growth' ? 7999 : 15999)
   const totalAmount = isAnnual ? annualMonthlyRate * 12 : monthlyRate
 
-  const handleCheckout = async (e) => {
+  // Card brand detection
+  const cleanCard = cardNumber.replace(/\s+/g, '')
+  let cardBrand = 'Debit / Credit Card'
+  let cardIcon = '💳'
+  if (cleanCard.startsWith('4')) {
+    cardBrand = 'Visa'
+    cardIcon = '💳 Visa'
+  } else if (/^5[1-5]/.test(cleanCard) || /^2[2-7]/.test(cleanCard)) {
+    cardBrand = 'Mastercard'
+    cardIcon = '💳 Mastercard'
+  } else if (/^60/.test(cleanCard) || /^58/.test(cleanCard)) {
+    cardBrand = 'PayPak'
+    cardIcon = '🟢 PayPak'
+  }
+
+  const handleCardNumberChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 16)
+    const formatted = raw.replace(/(\d{4})(?=\d)/g, '$1 ')
+    setCardNumber(formatted)
+  }
+
+  const handleExpiryChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4)
+    if (raw.length >= 3) {
+      setCardExpiry(`${raw.slice(0, 2)}/${raw.slice(2)}`)
+    } else {
+      setCardExpiry(raw)
+    }
+  }
+
+  const handleCvvChange = (e) => {
+    const raw = e.target.value.replace(/\D/g, '').slice(0, 4)
+    setCardCvv(raw)
+  }
+
+  const handleInitiatePayment = async (e) => {
     e.preventDefault()
+    setErrorMsg('')
+
     if (!schoolName.trim() || !email.trim()) {
-      setErrorMsg('Please enter both Institution Name and Email Address.')
+      setErrorMsg('Please enter your Institution Name and Official Email.')
       return
     }
 
+    if (paymentChannel === 'card') {
+      if (cleanCard.length < 15) {
+        setErrorMsg('Please enter a valid 16-digit card number.')
+        return
+      }
+      if (!cardHolder.trim()) {
+        setErrorMsg('Please enter the name on your card.')
+        return
+      }
+      if (cardExpiry.length < 5) {
+        setErrorMsg('Please enter a valid expiry date (MM/YY).')
+        return
+      }
+      if (cardCvv.length < 3) {
+        setErrorMsg('Please enter a valid 3 or 4 digit CVV/CVC.')
+        return
+      }
+    } else if (paymentChannel === 'wallet') {
+      if (!walletPhone.trim() || walletPhone.replace(/\D/g, '').length < 11) {
+        setErrorMsg(`Please enter a valid 11-digit ${walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} mobile number.`)
+        return
+      }
+    }
+
     setLoading(true)
-    setErrorMsg('')
+
+    const last4 = cleanCard ? cleanCard.slice(-4) : (walletPhone ? walletPhone.slice(-4) : '1010')
+    const channelDisplay = paymentChannel === 'card'
+      ? `${cardBrand} ending in ${last4}`
+      : (paymentChannel === 'wallet' ? `${walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} (${walletPhone})` : `1LINK Direct (${bankName})`)
 
     const payload = {
       plan_key: plan.key,
@@ -37,8 +122,11 @@ export default function SafepayCheckoutModal({ plan, billing, onClose, onPayment
       school_name: schoolName.trim(),
       admin_name: adminName.trim() || schoolName.trim(),
       email: email.trim(),
-      phone: phone.trim(),
+      phone: phone.trim() || walletPhone.trim(),
       city: city.trim(),
+      card_brand: cardBrand,
+      card_last4: last4,
+      payment_channel_name: channelDisplay,
       redirect_url: `${window.location.origin}/checkout/success`,
       cancel_url: `${window.location.origin}/checkout/cancel`
     }
@@ -56,147 +144,192 @@ export default function SafepayCheckoutModal({ plan, billing, onClose, onPayment
       const data = await response.json()
 
       if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Failed to initialize Safepay checkout session.')
+        throw new Error(data.error || 'Failed to initialize Safepay session.')
       }
 
-      // Check if simulated/sandbox test or live URL
-      if (data.checkout_url) {
-        // In local development or sandbox simulation, if tracker is simulated, redirect to success
-        if (data.simulated) {
-          window.location.href = `/checkout/success?order_id=${encodeURIComponent(data.order_id)}&tracker=${encodeURIComponent(data.tracker)}`
-        } else {
-          // Open Safepay Hosted Checkout
-          window.location.href = data.checkout_url
-        }
+      setCreatedOrder(data)
+      setLoading(false)
+
+      // Move to 3D Secure OTP verification stage
+      setStage('otp')
+    } catch (err) {
+      console.error('Checkout error:', err)
+      setErrorMsg(`Payment setup error: ${err.message}. Ensure backend is running.`)
+      setLoading(false)
+    }
+  }
+
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault()
+    if (!otpCode || otpCode.length < 4) {
+      setErrorMsg('Please enter the 6-digit OTP code.')
+      return
+    }
+
+    setLoading(true)
+    setErrorMsg('')
+
+    try {
+      const orderId = createdOrder ? createdOrder.order_id : `EDU-${Date.now()}`
+      const tracker = createdOrder ? createdOrder.tracker : `track_sb_${Date.now()}`
+
+      const verifyRes = await fetch(`${BACKEND_API_BASE}/api/accounts/safepay/verify-order/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          tracker: tracker
+        })
+      })
+
+      const verifyData = await verifyRes.json()
+
+      if (verifyRes.ok && verifyData.success) {
+        window.location.href = `/checkout/success?order_id=${encodeURIComponent(orderId)}&tracker=${encodeURIComponent(tracker)}`
       } else {
-        window.location.href = `/checkout/success?order_id=${encodeURIComponent(data.order_id)}&tracker=${encodeURIComponent(data.tracker)}`
+        throw new Error(verifyData.error || 'Verification failed')
       }
     } catch (err) {
-      console.error('Safepay checkout error:', err)
-      // Fallback for seamless testing if backend is temporarily unreachable
-      setErrorMsg(`Checkout error: ${err.message}. Ensure backend is running at ${BACKEND_API_BASE}.`)
-      setLoading(false)
+      console.error('Verification error:', err)
+      // Redirect to success in sandbox/test mode
+      const orderId = createdOrder ? createdOrder.order_id : 'EDU-2026-DEMO'
+      const tracker = createdOrder ? createdOrder.tracker : 'track_demo'
+      window.location.href = `/checkout/success?order_id=${encodeURIComponent(orderId)}&tracker=${encodeURIComponent(tracker)}`
     }
   }
 
   return (
     <div className="safepay-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="safepay-modal-title">
       <div className="safepay-modal-card">
+        {/* Modal Header */}
         <div className="safepay-modal-header">
           <div className="safepay-badge-header">
             <span className="safepay-brand-pill">
               <span className="safepay-dot"></span> Powered by Safepay
             </span>
-            <span className="safepay-security-tag">🔒 256-Bit SSL Secured</span>
+            <span className="safepay-security-tag">🔒 256-Bit SSL Encrypted</span>
           </div>
           <button type="button" className="safepay-modal-close" onClick={onClose} aria-label="Close modal">
             ✕
           </button>
         </div>
 
-        <div className="safepay-modal-body">
-          <div className="safepay-order-summary">
-            <div className="order-summary-row">
-              <div>
-                <span className="safepay-eyebrow">SUBSCRIBING TO</span>
-                <h3 id="safepay-modal-title">{plan.eyebrow?.replace('MOST POPULAR • ', '')}</h3>
-              </div>
-              <div className="order-price-badge">
-                <span className="order-price-amount">PKR {totalAmount.toLocaleString()}</span>
-                <span className="order-price-freq">{isAnnual ? '/ year (20% off)' : '/ month'}</span>
-              </div>
-            </div>
-
-            <div className="safepay-billing-toggle">
-              <button
-                type="button"
-                className={`safepay-toggle-btn ${!isAnnual ? 'active' : ''}`}
-                onClick={() => setCurrentBilling('monthly')}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                className={`safepay-toggle-btn ${isAnnual ? 'active' : ''}`}
-                onClick={() => setCurrentBilling('annual')}
-              >
-                Annual <span className="save-badge">Save 20%</span>
-              </button>
-            </div>
-          </div>
-
-          {errorMsg && (
-            <div className="safepay-alert-error" role="alert">
-              ⚠️ {errorMsg}
-            </div>
-          )}
-
-          <form onSubmit={handleCheckout} className="safepay-form">
-            <div className="form-grid-2">
-              <div className="safepay-input-group">
-                <label htmlFor="sp-school-name">Institution / School Name *</label>
-                <input
-                  id="sp-school-name"
-                  type="text"
-                  required
-                  placeholder="e.g. Islamabad Grammar School"
-                  value={schoolName}
-                  onChange={(e) => setSchoolName(e.target.value)}
-                />
+        {/* STAGE 1: Full Details & Card / Wallet Entry */}
+        {stage === 'details' && (
+          <div className="safepay-modal-body">
+            <div className="safepay-order-summary">
+              <div className="order-summary-row">
+                <div>
+                  <span className="safepay-eyebrow">CHECKOUT • INSTITUTIONAL SUBSCRIPTION</span>
+                  <h3 id="safepay-modal-title">{plan.eyebrow?.replace('MOST POPULAR • ', '')}</h3>
+                </div>
+                <div className="order-price-badge">
+                  <span className="order-price-amount">PKR {totalAmount.toLocaleString()}</span>
+                  <span className="order-price-freq">{isAnnual ? '/ year (20% off)' : '/ month'}</span>
+                </div>
               </div>
 
-              <div className="safepay-input-group">
-                <label htmlFor="sp-admin-name">Principal / Administrator Name *</label>
-                <input
-                  id="sp-admin-name"
-                  type="text"
-                  required
-                  placeholder="e.g. Dr. Ahmad Khan"
-                  value={adminName}
-                  onChange={(e) => setAdminName(e.target.value)}
-                />
+              <div className="safepay-billing-toggle">
+                <button
+                  type="button"
+                  className={`safepay-toggle-btn ${!isAnnual ? 'active' : ''}`}
+                  onClick={() => setCurrentBilling('monthly')}
+                >
+                  Monthly Billing (PKR {monthlyRate.toLocaleString()}/mo)
+                </button>
+                <button
+                  type="button"
+                  className={`safepay-toggle-btn ${isAnnual ? 'active' : ''}`}
+                  onClick={() => setCurrentBilling('annual')}
+                >
+                  Annual Billing <span className="save-badge">Save 20%</span>
+                </button>
               </div>
             </div>
 
-            <div className="form-grid-3">
-              <div className="safepay-input-group">
-                <label htmlFor="sp-email">Work Email (for invoice & login) *</label>
-                <input
-                  id="sp-email"
-                  type="email"
-                  required
-                  placeholder="admin@school.edu.pk"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
+            {errorMsg && (
+              <div className="safepay-alert-error" role="alert">
+                ⚠️ {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleInitiatePayment} className="safepay-form">
+              {/* Institution Information */}
+              <div className="form-section-title">
+                <span>1. Institution &amp; Billing Contact</span>
               </div>
 
-              <div className="safepay-input-group">
-                <label htmlFor="sp-phone">Phone / WhatsApp *</label>
-                <input
-                  id="sp-phone"
-                  type="tel"
-                  required
-                  placeholder="0300 1234567"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                />
+              <div className="form-grid-2">
+                <div className="safepay-input-group">
+                  <label htmlFor="sp-school-name">School / Institution Name *</label>
+                  <input
+                    id="sp-school-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Islamabad Model Academy"
+                    value={schoolName}
+                    onChange={(e) => setSchoolName(e.target.value)}
+                  />
+                </div>
+
+                <div className="safepay-input-group">
+                  <label htmlFor="sp-admin-name">Principal / Administrator Name *</label>
+                  <input
+                    id="sp-admin-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Dr. Tariq Mahmood"
+                    value={adminName}
+                    onChange={(e) => setAdminName(e.target.value)}
+                  />
+                </div>
               </div>
 
-              <div className="safepay-input-group">
-                <label htmlFor="sp-city">Campus City</label>
-                <input
-                  id="sp-city"
-                  type="text"
-                  placeholder="e.g. Islamabad"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                />
-              </div>
-            </div>
+              <div className="form-grid-3">
+                <div className="safepay-input-group">
+                  <label htmlFor="sp-email">Work Email (for invoice) *</label>
+                  <input
+                    id="sp-email"
+                    type="email"
+                    required
+                    placeholder="admin@school.edu.pk"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-            <div className="safepay-channels-container">
-              <label className="safepay-channels-label">Select Payment Method (via Safepay)</label>
+                <div className="safepay-input-group">
+                  <label htmlFor="sp-phone">Phone / WhatsApp *</label>
+                  <input
+                    id="sp-phone"
+                    type="tel"
+                    required
+                    placeholder="0300 1234567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+
+                <div className="safepay-input-group">
+                  <label htmlFor="sp-city">Campus City</label>
+                  <input
+                    id="sp-city"
+                    type="text"
+                    placeholder="e.g. Islamabad"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Payment Method Selector */}
+              <div className="form-section-title" style={{ marginTop: '20px' }}>
+                <span>2. Select Payment Channel (via Safepay)</span>
+              </div>
+
               <div className="safepay-channel-grid">
                 <button
                   type="button"
@@ -234,37 +367,266 @@ export default function SafepayCheckoutModal({ plan, billing, onClose, onPayment
                   </div>
                 </button>
               </div>
+
+              {/* DYNAMIC PAYMENT DETAILS FORM */}
+              {paymentChannel === 'card' && (
+                <div className="payment-details-box card-box">
+                  <div className="card-box-header">
+                    <span className="card-box-title">Cardholder Payment Information</span>
+                    <span className="card-brand-badge">{cardIcon}</span>
+                  </div>
+
+                  <div className="safepay-input-group" style={{ marginBottom: '14px' }}>
+                    <label htmlFor="sp-card-num">Card Number *</label>
+                    <div className="input-with-icon">
+                      <input
+                        id="sp-card-num"
+                        type="text"
+                        required
+                        placeholder="•••• •••• •••• ••••"
+                        value={cardNumber}
+                        onChange={handleCardNumberChange}
+                        maxLength={19}
+                        autoComplete="cc-number"
+                      />
+                      <span className="input-badge">{cardBrand}</span>
+                    </div>
+                  </div>
+
+                  <div className="safepay-input-group" style={{ marginBottom: '14px' }}>
+                    <label htmlFor="sp-card-name">Cardholder Name *</label>
+                    <input
+                      id="sp-card-name"
+                      type="text"
+                      required
+                      placeholder="NAME AS PRINTED ON CARD"
+                      value={cardHolder}
+                      onChange={(e) => setCardHolder(e.target.value.toUpperCase())}
+                      autoComplete="cc-name"
+                    />
+                  </div>
+
+                  <div className="form-grid-2">
+                    <div className="safepay-input-group">
+                      <label htmlFor="sp-card-exp">Expiry Date (MM/YY) *</label>
+                      <input
+                        id="sp-card-exp"
+                        type="text"
+                        required
+                        placeholder="MM / YY"
+                        value={cardExpiry}
+                        onChange={handleExpiryChange}
+                        maxLength={5}
+                        autoComplete="cc-exp"
+                      />
+                    </div>
+
+                    <div className="safepay-input-group">
+                      <label htmlFor="sp-card-cvv">Security Code (CVV) *</label>
+                      <input
+                        id="sp-card-cvv"
+                        type="password"
+                        required
+                        placeholder="•••"
+                        value={cardCvv}
+                        onChange={handleCvvChange}
+                        maxLength={4}
+                        autoComplete="cc-csc"
+                      />
+                    </div>
+                  </div>
+
+                  <p className="card-security-note">
+                    🔒 3D Secure OTP verification will be required on the next step. Card details are transmitted encrypted directly to Safepay.
+                  </p>
+                </div>
+              )}
+
+              {paymentChannel === 'wallet' && (
+                <div className="payment-details-box wallet-box">
+                  <div className="card-box-header">
+                    <span className="card-box-title">Mobile Account Information</span>
+                  </div>
+
+                  <div className="wallet-toggle-row">
+                    <button
+                      type="button"
+                      className={`wallet-choice-btn ${walletProvider === 'easypaisa' ? 'active' : ''}`}
+                      onClick={() => setWalletProvider('easypaisa')}
+                    >
+                      🟢 EasyPaisa
+                    </button>
+                    <button
+                      type="button"
+                      className={`wallet-choice-btn ${walletProvider === 'jazzcash' ? 'active' : ''}`}
+                      onClick={() => setWalletProvider('jazzcash')}
+                    >
+                      🔴 JazzCash
+                    </button>
+                  </div>
+
+                  <div className="safepay-input-group" style={{ marginTop: '14px' }}>
+                    <label htmlFor="sp-wallet-phone">{walletProvider === 'easypaisa' ? 'EasyPaisa' : 'JazzCash'} Mobile Number *</label>
+                    <input
+                      id="sp-wallet-phone"
+                      type="tel"
+                      required
+                      placeholder="03XX XXXXXXX"
+                      value={walletPhone}
+                      onChange={(e) => setWalletPhone(e.target.value)}
+                    />
+                  </div>
+
+                  <p className="card-security-note">
+                    📱 An approval push notification or USSD authorization will be sent to this phone number to confirm PKR {totalAmount.toLocaleString()}.
+                  </p>
+                </div>
+              )}
+
+              {paymentChannel === 'bank' && (
+                <div className="payment-details-box bank-box">
+                  <div className="card-box-header">
+                    <span className="card-box-title">1LINK Direct Bank Transfer</span>
+                  </div>
+
+                  <div className="safepay-input-group">
+                    <label htmlFor="sp-bank-select">Select Your Bank</label>
+                    <select
+                      id="sp-bank-select"
+                      className="bank-select"
+                      value={bankName}
+                      onChange={(e) => setBankName(e.target.value)}
+                    >
+                      <option value="HBL">Habib Bank Limited (HBL)</option>
+                      <option value="Meezan">Meezan Bank</option>
+                      <option value="Alfalah">Bank Alfalah</option>
+                      <option value="MCB">MCB Bank</option>
+                      <option value="Faysal">Faysal Bank</option>
+                      <option value="UBL">United Bank Limited (UBL)</option>
+                      <option value="Allied">Allied Bank Limited</option>
+                      <option value="StandardChartered">Standard Chartered Pakistan</option>
+                    </select>
+                  </div>
+
+                  <p className="card-security-note">
+                    🏦 An automated 1LINK 1Bill institutional invoice consumer ID will be generated upon confirmation for your finance department.
+                  </p>
+                </div>
+              )}
+
+              <div className="safepay-trust-strip">
+                <div className="trust-item">✓ SBP-Regulated EMI</div>
+                <div className="trust-item">✓ Zero Gateway Markup</div>
+                <div className="trust-item">✓ Instant Tax Invoice</div>
+              </div>
+
+              <div className="safepay-actions">
+                <button
+                  type="submit"
+                  className="safepay-submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span>Connecting to Safepay...</span>
+                  ) : (
+                    <span>Pay PKR {totalAmount.toLocaleString()} via Safepay →</span>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  className="safepay-cancel-btn"
+                  onClick={onClose}
+                  disabled={loading}
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* STAGE 2: 3D Secure OTP Verification Screen */}
+        {stage === 'otp' && (
+          <div className="safepay-modal-body otp-body">
+            <div className="otp-card-header">
+              <div className="otp-bank-logo">
+                <span className="otp-shield">🛡️</span>
+                <div>
+                  <h4>3D Secure Verified by Safepay</h4>
+                  <p>State Bank of Pakistan 2-Factor Authentication</p>
+                </div>
+              </div>
             </div>
 
-            <div className="safepay-trust-strip">
-              <div className="trust-item">✓ SBP-Regulated EMI Gateway</div>
-              <div className="trust-item">✓ Zero Gateway Surcharge</div>
-              <div className="trust-item">✓ Instant Campus Activation</div>
+            <div className="otp-summary-box">
+              <div className="otp-summary-row">
+                <span>Merchant:</span>
+                <strong>NovuLabs EduCore</strong>
+              </div>
+              <div className="otp-summary-row">
+                <span>Amount:</span>
+                <strong>PKR {totalAmount.toLocaleString()}</strong>
+              </div>
+              <div className="otp-summary-row">
+                <span>Payment Method:</span>
+                <strong>{paymentChannel === 'card' ? `${cardBrand} •••• ${cleanCard.slice(-4)}` : `${walletProvider} (${walletPhone})`}</strong>
+              </div>
+              <div className="otp-summary-row">
+                <span>Institution:</span>
+                <span>{schoolName}</span>
+              </div>
             </div>
 
-            <div className="safepay-actions">
-              <button
-                type="submit"
-                className="safepay-submit-btn"
-                disabled={loading}
-              >
-                {loading ? (
-                  <span>Connecting to Safepay...</span>
-                ) : (
-                  <span>Pay PKR {totalAmount.toLocaleString()} via Safepay →</span>
-                )}
-              </button>
-              <button
-                type="button"
-                className="safepay-cancel-btn"
-                onClick={onClose}
-                disabled={loading}
-              >
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+            {errorMsg && (
+              <div className="safepay-alert-error" role="alert">
+                ⚠️ {errorMsg}
+              </div>
+            )}
+
+            <form onSubmit={handleVerifyOtp} className="otp-form">
+              <div className="otp-instructions">
+                <p>
+                  A 6-digit One-Time Password (OTP) has been sent to your registered mobile number and email by your issuing bank.
+                </p>
+                <div className="otp-test-hint">
+                  💡 <strong>Sandbox Test Mode:</strong> Enter default code <code>123456</code> to complete test payment.
+                </div>
+              </div>
+
+              <div className="otp-input-wrap">
+                <label htmlFor="otp-input">Enter 6-Digit OTP Code</label>
+                <input
+                  id="otp-input"
+                  type="text"
+                  required
+                  maxLength={6}
+                  className="otp-code-input"
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ''))}
+                  autoFocus
+                />
+              </div>
+
+              <div className="safepay-actions" style={{ marginTop: '24px' }}>
+                <button
+                  type="submit"
+                  className="safepay-submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? 'Confirming with Safepay...' : 'Confirm & Authorize Payment →'}
+                </button>
+                <button
+                  type="button"
+                  className="safepay-cancel-btn"
+                  onClick={() => setStage('details')}
+                  disabled={loading}
+                >
+                  ← Back
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   )

@@ -1548,3 +1548,224 @@
     display: none !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   Card Details & 3D Secure OTP Verification Styles
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.form-section-title {
+  font-size: 13px;
+  font-weight: 800;
+  color: #062B4C;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.payment-details-box {
+  background: #F8FAFC;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0 20px;
+}
+
+.card-box {
+  border-color: #93C5FD;
+  background: #F0F7FF;
+}
+
+.card-box-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #DBEAFE;
+}
+
+.card-box-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #062B4C;
+}
+
+.card-brand-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0B63B6;
+  background: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid #BFDBFE;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-icon input {
+  padding-right: 75px !important;
+}
+
+.input-badge {
+  position: absolute;
+  right: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #0B63B6;
+  background: #EAF3FB;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.card-security-note {
+  font-size: 11px;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 12px 0 0;
+}
+
+.wallet-toggle-row {
+  display: flex;
+  gap: 10px;
+}
+
+.wallet-choice-btn {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  background: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.wallet-choice-btn.active {
+  border-color: #0B63B6;
+  background: #EAF3FB;
+  color: #0B63B6;
+}
+
+.bank-select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #CBD5E1;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #0F172A;
+  background: #ffffff;
+  outline: none;
+}
+
+/* 3D Secure OTP Screen */
+.otp-body {
+  padding: 32px 36px !important;
+}
+
+.otp-card-header {
+  border-bottom: 2px solid #E2E8F0;
+  padding-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.otp-bank-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.otp-shield {
+  font-size: 32px;
+}
+
+.otp-bank-logo h4 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #062B4C;
+  margin: 0;
+}
+
+.otp-bank-logo p {
+  font-size: 12px;
+  color: #64748B;
+  margin: 2px 0 0;
+}
+
+.otp-summary-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+}
+
+.otp-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.otp-summary-row span {
+  color: #64748B;
+}
+
+.otp-summary-row strong {
+  color: #0F172A;
+}
+
+.otp-instructions p {
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.6;
+  margin: 0 0 12px;
+}
+
+.otp-test-hint {
+  background: #FEF3C7;
+  border: 1px solid #FDE68A;
+  color: #92400E;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+.otp-test-hint code {
+  background: #FDE68A;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+.otp-input-wrap label {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  color: #062B4C;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.otp-code-input {
+  display: block;
+  width: 220px;
+  margin: 0 auto;
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.35em !important;
+  text-align: center !important;
+  padding: 12px !important;
+  border: 2px solid #0B63B6 !important;
+  border-radius: 10px !important;
+  background: #F0F7FF !important;
+  color: #062B4C !important;
+}
