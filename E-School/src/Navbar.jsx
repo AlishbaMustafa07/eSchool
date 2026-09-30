@@ -4,7 +4,7 @@ export function Brand({ footer = false }) {
   return (
     <a className={`brand ${footer ? 'brand-footer' : ''}`} href="/" aria-label="NovuLabs EduCore home">
       <img src="/logo.png" alt="NovuLabs EduCore Logo" className="brand-logo" />
-      <span>EduCore<span className="brand-dot">.</span></span>
+      <span>NovuLabs <span className="brand-accent">EduCore<span className="brand-dot">.</span></span></span>
     </a>
   )
 }

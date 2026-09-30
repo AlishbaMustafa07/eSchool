@@ -104,6 +104,10 @@
   box-shadow: 0 5px 12px rgba(11, 99, 182, 0.25);
 }
 
+.brand-accent {
+  color: #0B63B6;
+}
+
 .brand-dot {
   color: #0B63B6;
 }
@@ -1714,7 +1718,13 @@
   }
 
   .brand {
-    font-size: 20px;
+    font-size: 18px;
+    gap: 8px;
+  }
+
+  .brand-logo {
+    width: 28px;
+    height: 28px;
   }
 
   .mobile-menu {
