@@ -635,7 +635,7 @@ function CheckoutSuccessPage() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const orderId = params.get('order_id')
-    const tracker = params.get('tracker')
+    const tracker = params.get('tracker') || params.get('beacon')
 
     if (!orderId && !tracker) {
       setError('No order reference or tracker token found in transaction response.')

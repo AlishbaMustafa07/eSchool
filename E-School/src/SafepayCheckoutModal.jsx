@@ -147,10 +147,14 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
         throw new Error(data.error || 'Failed to initialize Safepay session.')
       }
 
+      // If official Safepay checkout URL is returned, redirect immediately to Safepay
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url
+        return
+      }
+
       setCreatedOrder(data)
       setLoading(false)
-
-      // Move to 3D Secure OTP verification stage
       setStage('otp')
     } catch (err) {
       console.error('Checkout error:', err)
