@@ -88,6 +88,48 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
 
     setLoading(true)
 
+    // Open popup window immediately inside user gesture so Cybersource Flex renders Card Number and CVV with full permissions
+    const width = 520
+    const height = 750
+    const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2)
+    const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2)
+    let popup = null
+    try {
+      popup = window.open(
+        'about:blank',
+        'SafepayCheckoutPopup',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=no,menubar=no,scrollbars=yes,status=no`
+      )
+      if (popup) {
+        popup.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8" />
+              <title>Safepay Checkout • NovuLabs EduCore</title>
+              <style>
+                body { margin: 0; padding: 0; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #F8FAFC; color: #062B4C; }
+                .loader-card { text-align: center; background: white; padding: 32px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 1px solid #E2E8F0; max-width: 320px; }
+                .spinner { width: 44px; height: 44px; border: 4px solid #E2E8F0; border-top-color: #0B63B6; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 18px; }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                h3 { margin: 0 0 8px; font-size: 17px; }
+                p { margin: 0; color: #64748B; font-size: 13px; }
+              </style>
+            </head>
+            <body>
+              <div class="loader-card">
+                <div class="spinner"></div>
+                <h3>Connecting to Safepay...</h3>
+                <p>Initializing secure checkout for ${schoolName.trim() || 'your campus'}</p>
+              </div>
+            </body>
+          </html>
+        `)
+      }
+    } catch (popupErr) {
+      console.warn('Popup open warning:', popupErr)
+    }
+
     const channelDisplay = paymentChannel === 'card'
       ? 'Debit / Credit Card (Visa, Mastercard, PayPak)'
       : (paymentChannel === 'wallet' ? 'Mobile Wallet (EasyPaisa, JazzCash)' : `1LINK Direct (${bankName})`)
@@ -118,15 +160,21 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
+        if (popup && !popup.closed) popup.close()
         throw new Error(data.error || 'Failed to initialize Safepay session.')
       }
 
-      // Open Safepay checkout directly inside the modal (no external page redirect)
       setCreatedOrder(data)
       setLoading(false)
-      setIframeLoading(true)
-      setStage('safepay_embedded')
+      setStage('safepay_active')
+
+      if (popup && !popup.closed) {
+        popup.location.href = data.checkout_url
+      } else {
+        window.open(data.checkout_url, 'SafepayCheckoutPopup', `width=${width},height=${height},left=${left},top=${top}`)
+      }
     } catch (err) {
+      if (popup && !popup.closed) popup.close()
       console.error('Checkout error:', err)
       setErrorMsg(`Payment setup error: ${err.message}. Ensure backend is running.`)
       setLoading(false)
@@ -448,61 +496,56 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
           </div>
         )}
 
-        {/* STAGE 2: Embedded Safepay Checkout inside Modal (No External Page Redirect) */}
-        {stage === 'safepay_embedded' && createdOrder && (
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minHeight: 0 }}>
-            <div className="safepay-embedded-topbar">
-              <div className="embedded-top-left">
-                <span className="embedded-shield-icon">🛡️</span>
-                <div>
-                  <div className="embedded-brand-name">Safepay In-App Checkout</div>
-                  <span className="embedded-order-pill">#{createdOrder.order_id}</span>
-                </div>
+        {/* STAGE 2: Safepay Popup Active (Top-Level Secure Window for Cybersource Flex) */}
+        {stage === 'safepay_active' && createdOrder && (
+          <div className="safepay-modal-body" style={{ textAlign: 'center', padding: '36px 28px' }}>
+            <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: '#EFF6FF', color: '#0B63B6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '32px', margin: '0 auto 16px', border: '1.5px solid #BFDBFE' }}>
+              🛡️
+            </div>
+            <h3 style={{ fontSize: '20px', fontWeight: 800, color: '#062B4C', margin: '0 0 8px' }}>
+              Safepay Payment Window Active
+            </h3>
+            <p style={{ color: '#475569', fontSize: '14px', maxWidth: '460px', margin: '0 auto 20px', lineHeight: 1.5 }}>
+              A secure Safepay payment window has opened so the <strong>Card Number</strong> and <strong>CVV</strong> fields load cleanly without browser iframe restrictions.
+            </p>
+
+            <div className="safepay-embedded-test-banner" style={{ textAlign: 'left', borderRadius: '10px', marginBottom: '24px', padding: '14px 18px', background: '#F0F9FF', border: '1.5px solid #BAE6FD' }}>
+              <div className="test-banner-title" style={{ color: '#0369A1', fontSize: '13px', marginBottom: '6px' }}>
+                <span>🟢 Safepay Sandbox Test Card Credentials</span>
               </div>
-              <div className="embedded-top-right">
-                <span className="embedded-amount-badge">PKR {totalAmount.toLocaleString()}</span>
-                <button
-                  type="button"
-                  className="embedded-back-btn"
-                  onClick={() => setStage('details')}
-                >
-                  ← Edit Info
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  aria-label="Close modal"
-                  style={{ color: '#ffffff', fontSize: '18px', padding: '0 6px', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}
-                >
-                  ✕
-                </button>
+              <div style={{ fontSize: '13px', color: '#0C4A6E', lineHeight: '1.8' }}>
+                <div><strong>Card Number:</strong> <code style={{ background: '#E0F2FE', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, letterSpacing: '0.05em' }}>5123 4567 8901 2345</code></div>
+                <div><strong>Expiry:</strong> <code style={{ background: '#E0F2FE', padding: '2px 6px', borderRadius: '4px' }}>12/28</code> &nbsp;|&nbsp; <strong>CVV:</strong> <code style={{ background: '#E0F2FE', padding: '2px 6px', borderRadius: '4px' }}>123</code> &nbsp;|&nbsp; <strong>OTP:</strong> <code style={{ background: '#E0F2FE', padding: '2px 6px', borderRadius: '4px' }}>1234</code></div>
               </div>
             </div>
 
-            <div className="safepay-embedded-test-banner">
-              <div className="test-banner-title">
-                <span>🟢 Safepay SBP Sandbox Gateway</span>
-              </div>
-              <div className="test-banner-keys">
-                <strong>Test Card:</strong> <code>5123 4567 8901 2345</code> | Exp: <code>12/28</code> | CVV: <code>123</code> | OTP: <code>1234</code>
-              </div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                className="safepay-submit-btn"
+                style={{ width: 'auto', padding: '12px 24px' }}
+                onClick={() => {
+                  const width = 520
+                  const height = 750
+                  const left = window.screenX + Math.max(0, (window.outerWidth - width) / 2)
+                  const top = window.screenY + Math.max(0, (window.outerHeight - height) / 2)
+                  window.open(createdOrder.checkout_url, 'SafepayCheckoutPopup', `width=${width},height=${height},left=${left},top=${top}`)
+                }}
+              >
+                Re-open Safepay Window ↗
+              </button>
+              <button
+                type="button"
+                className="safepay-cancel-btn"
+                onClick={() => setStage('details')}
+              >
+                ← Edit Info
+              </button>
             </div>
-
-            <div className="safepay-iframe-wrapper">
-              {iframeLoading && (
-                <div className="safepay-iframe-loading">
-                  <div className="receipt-spinner"></div>
-                  <p>Loading Safepay Secure Payment Gateway...</p>
-                </div>
-              )}
-              <iframe
-                src={createdOrder.checkout_url}
-                title="Safepay In-App Payment Gateway"
-                className="safepay-embedded-iframe"
-                allow="payment *"
-                onLoad={handleIframeLoad}
-              />
-            </div>
+            
+            <p style={{ fontSize: '12px', color: '#94A3B8', marginTop: '20px', marginBottom: 0 }}>
+              Once you complete the payment in the Safepay window, this page will automatically update to your official tax invoice.
+            </p>
           </div>
         )}
 

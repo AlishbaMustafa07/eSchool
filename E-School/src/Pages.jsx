@@ -633,6 +633,17 @@ function CheckoutSuccessPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    // If completed inside a popup window, redirect the parent window to success and close the popup
+    if (window.opener && !window.opener.closed) {
+      try {
+        window.opener.location.href = window.location.href
+        window.close()
+        return
+      } catch (e) {
+        console.warn('Popup redirect warning:', e)
+      }
+    }
+
     // If running inside embedded modal iframe, break out into the main window
     if (window.self !== window.top) {
       window.top.location.href = window.location.href
@@ -806,6 +817,15 @@ function CheckoutSuccessPage() {
 
 function CheckoutCancelPage() {
   useEffect(() => {
+    if (window.opener && !window.opener.closed) {
+      try {
+        window.opener.location.href = '/pricing'
+        window.close()
+        return
+      } catch (e) {
+        console.warn('Popup cancel warning:', e)
+      }
+    }
     if (window.self !== window.top) {
       window.top.location.href = window.location.href
     }
