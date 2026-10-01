@@ -633,6 +633,12 @@ function CheckoutSuccessPage() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
+    // If running inside embedded modal iframe, break out into the main window
+    if (window.self !== window.top) {
+      window.top.location.href = window.location.href
+      return
+    }
+
     const params = new URLSearchParams(window.location.search)
     const orderId = params.get('order_id')
     const tracker = params.get('tracker') || params.get('beacon')
@@ -799,6 +805,12 @@ function CheckoutSuccessPage() {
 }
 
 function CheckoutCancelPage() {
+  useEffect(() => {
+    if (window.self !== window.top) {
+      window.top.location.href = window.location.href
+    }
+  }, [])
+
   return (
     <Layout>
       <section className="local-page-heading">

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const BACKEND_API_BASE = 'http://127.0.0.1:4000'
 
@@ -26,10 +26,11 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
   // Bank State
   const [bankName, setBankName] = useState('HBL')
 
-  // Checkout Stages: 'details' -> 'otp' -> 'processing'
+  // Checkout Stages: 'details' -> 'safepay_embedded' -> 'otp'
   const [stage, setStage] = useState('details')
   const [otpCode, setOtpCode] = useState('123456')
   const [loading, setLoading] = useState(false)
+  const [iframeLoading, setIframeLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
   const [createdOrder, setCreatedOrder] = useState(null)
 
@@ -120,21 +121,50 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
         throw new Error(data.error || 'Failed to initialize Safepay session.')
       }
 
-      // If official Safepay checkout URL is returned, redirect immediately to Safepay
-      if (data.checkout_url) {
-        window.location.href = data.checkout_url
-        return
-      }
-
+      // Open Safepay checkout directly inside the modal (no external page redirect)
       setCreatedOrder(data)
       setLoading(false)
-      setStage('otp')
+      setIframeLoading(true)
+      setStage('safepay_embedded')
     } catch (err) {
       console.error('Checkout error:', err)
       setErrorMsg(`Payment setup error: ${err.message}. Ensure backend is running.`)
       setLoading(false)
     }
   }
+
+  const handleIframeLoad = (e) => {
+    setIframeLoading(false)
+    try {
+      const url = e.target.contentWindow?.location?.href
+      if (url && (url.includes('/checkout/success') || url.includes('beacon=') || url.includes('tracker='))) {
+        window.location.href = url
+      } else if (url && url.includes('/checkout/cancel')) {
+        setStage('details')
+        setErrorMsg('Safepay checkout was cancelled. You can retry whenever you are ready.')
+      }
+    } catch {
+      // Cross-origin access while iframe is on getsafepay.com domain is expected
+    }
+  }
+
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (!event.data) return
+      try {
+        const payload = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
+        if (payload.beacon || payload.tracker) {
+          const tracker = payload.tracker || payload.beacon
+          const orderId = createdOrder ? createdOrder.order_id : ''
+          window.location.href = `/checkout/success?order_id=${encodeURIComponent(orderId)}&tracker=${encodeURIComponent(tracker)}`
+        }
+      } catch {
+        // Not a JSON message, ignore
+      }
+    }
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [createdOrder])
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault()
@@ -180,19 +210,21 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
 
   return (
     <div className="safepay-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="safepay-modal-title">
-      <div className="safepay-modal-card">
-        {/* Modal Header */}
-        <div className="safepay-modal-header">
-          <div className="safepay-badge-header">
-            <span className="safepay-brand-pill">
-              <span className="safepay-dot"></span> Powered by Safepay
-            </span>
-            <span className="safepay-security-tag">🔒 256-Bit SSL Encrypted</span>
+      <div className={`safepay-modal-card ${stage === 'safepay_embedded' ? 'embedded-mode' : ''}`}>
+        {/* Modal Header for Details & Fallback Stages */}
+        {stage !== 'safepay_embedded' && (
+          <div className="safepay-modal-header">
+            <div className="safepay-badge-header">
+              <span className="safepay-brand-pill">
+                <span className="safepay-dot"></span> Powered by Safepay
+              </span>
+              <span className="safepay-security-tag">🔒 256-Bit SSL Encrypted</span>
+            </div>
+            <button type="button" className="safepay-modal-close" onClick={onClose} aria-label="Close modal">
+              ✕
+            </button>
           </div>
-          <button type="button" className="safepay-modal-close" onClick={onClose} aria-label="Close modal">
-            ✕
-          </button>
-        </div>
+        )}
 
         {/* STAGE 1: Full Details & Card / Wallet Entry */}
         {stage === 'details' && (
@@ -416,7 +448,65 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
           </div>
         )}
 
-        {/* STAGE 2: 3D Secure OTP Verification Screen */}
+        {/* STAGE 2: Embedded Safepay Checkout inside Modal (No External Page Redirect) */}
+        {stage === 'safepay_embedded' && createdOrder && (
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minHeight: 0 }}>
+            <div className="safepay-embedded-topbar">
+              <div className="embedded-top-left">
+                <span className="embedded-shield-icon">🛡️</span>
+                <div>
+                  <div className="embedded-brand-name">Safepay In-App Checkout</div>
+                  <span className="embedded-order-pill">#{createdOrder.order_id}</span>
+                </div>
+              </div>
+              <div className="embedded-top-right">
+                <span className="embedded-amount-badge">PKR {totalAmount.toLocaleString()}</span>
+                <button
+                  type="button"
+                  className="embedded-back-btn"
+                  onClick={() => setStage('details')}
+                >
+                  ← Edit Info
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close modal"
+                  style={{ color: '#ffffff', fontSize: '18px', padding: '0 6px', background: 'none', border: 'none', cursor: 'pointer', lineHeight: 1 }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div className="safepay-embedded-test-banner">
+              <div className="test-banner-title">
+                <span>🟢 Safepay SBP Sandbox Gateway</span>
+              </div>
+              <div className="test-banner-keys">
+                <strong>Test Card:</strong> <code>5123 4567 8901 2345</code> | Exp: <code>12/28</code> | CVV: <code>123</code> | OTP: <code>1234</code>
+              </div>
+            </div>
+
+            <div className="safepay-iframe-wrapper">
+              {iframeLoading && (
+                <div className="safepay-iframe-loading">
+                  <div className="receipt-spinner"></div>
+                  <p>Loading Safepay Secure Payment Gateway...</p>
+                </div>
+              )}
+              <iframe
+                src={createdOrder.checkout_url}
+                title="Safepay In-App Payment Gateway"
+                className="safepay-embedded-iframe"
+                allow="payment *"
+                onLoad={handleIframeLoad}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* STAGE 3: 3D Secure OTP Verification Fallback Screen */}
         {stage === 'otp' && (
           <div className="safepay-modal-body otp-body">
             <div className="otp-card-header">
