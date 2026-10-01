@@ -9,6 +9,7 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
   const [city, setCity] = useState('')
+  const [adminPassword, setAdminPassword] = useState('')
   
   // Payment Method Selection
   const [paymentChannel, setPaymentChannel] = useState('card') // 'card', 'wallet', 'bank'
@@ -36,11 +37,17 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
 
   if (!plan) return null
 
-  // Pricing calculations
+  // Dynamic pricing calculations from backend plan or fallback
   const isAnnual = currentBilling === 'annual'
-  const monthlyRate = plan.key === 'starter' ? 4999 : (plan.key === 'growth' ? 9999 : 19999)
-  const annualMonthlyRate = plan.key === 'starter' ? 3999 : (plan.key === 'growth' ? 7999 : 15999)
-  const totalAmount = isAnnual ? annualMonthlyRate * 12 : monthlyRate
+  const monthlyRate = plan.rawPlan
+    ? Number(plan.rawPlan.price_monthly)
+    : (plan.key === 'starter' ? 4999 : (plan.key === 'growth' ? 9999 : 19999))
+  const annualMonthlyRate = plan.rawPlan
+    ? Math.round(Number(plan.rawPlan.price_annual) / 12)
+    : (plan.key === 'starter' ? 3999 : (plan.key === 'growth' ? 7999 : 15999))
+  const totalAmount = isAnnual
+    ? (plan.rawPlan ? Number(plan.rawPlan.price_annual) : annualMonthlyRate * 12)
+    : monthlyRate
 
   // Card brand detection
   const cleanCard = cardNumber.replace(/\s+/g, '')
@@ -142,6 +149,7 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
       email: email.trim(),
       phone: phone.trim() || walletPhone.trim(),
       city: city.trim(),
+      admin_password: adminPassword.trim() || 'EduCore@2026',
       payment_channel_name: channelDisplay,
       redirect_url: `${window.location.origin}/checkout/success`,
       cancel_url: `${window.location.origin}/checkout/cancel`
@@ -380,6 +388,24 @@ export default function SafepayCheckoutModal({ plan, billing, onClose }) {
                     onChange={(e) => setCity(e.target.value)}
                   />
                 </div>
+              </div>
+
+              <div className="safepay-input-group" style={{ marginTop: '12px' }}>
+                <label htmlFor="sp-admin-password">
+                  Create School Admin Password (for logging in once paid) *
+                </label>
+                <input
+                  id="sp-admin-password"
+                  type="password"
+                  required
+                  minLength="6"
+                  placeholder="e.g. Crescent@2026 (min 6 characters)"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                />
+                <small style={{ color: '#0369A1', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                  🔑 A dedicated Administrator account will be automatically provisioned for your campus upon payment confirmation.
+                </small>
               </div>
 
               {/* Payment Method Selector */}

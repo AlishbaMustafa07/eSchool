@@ -676,8 +676,59 @@ function PricingPage() {
   const [billing, setBilling] = useState('monthly')
   const [currency, setCurrency] = useState('PKR')
   const [selectedPlanForSafepay, setSelectedPlanForSafepay] = useState(null)
+  const [dynamicPlans, setDynamicPlans] = useState([])
 
-  const plans = [
+  useEffect(() => {
+    fetch('/api/accounts/plans/')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.map(p => ({
+            id: p.id,
+            key: p.plan_key || p.tier.toLowerCase(),
+            eyebrow: p.eyebrow || p.name.toUpperCase(),
+            name: p.name,
+            pkrMonthly: p.pkrMonthly || String(Math.round(p.price_monthly)),
+            pkrAnnual: p.pkrAnnual || String(Math.round(p.price_annual / 12)),
+            usdMonthly: p.usdMonthly || '29',
+            usdAnnual: p.usdAnnual || '24',
+            desc: p.description || 'Enterprise educational operations management suite.',
+            features: p.feature_bullets && p.feature_bullets.length > 0 ? p.feature_bullets : [
+              `Up to ${p.max_students} Enrolled Students`,
+              `Up to ${p.max_teachers} Faculty & Staff Seats`,
+              'Core SIS & Admin Workspace',
+              'Standard Email & WhatsApp Support'
+            ],
+            ctaText: p.is_featured ? 'Deploy Growth Plan →' : 'Start 14-Day Free Pilot →',
+            ctaHref: '/signup',
+            highlighted: !!p.is_featured,
+            rawPlan: p
+          }))
+
+          mapped.push({
+            key: 'custom',
+            eyebrow: 'DISTRICT & GOVERNMENT',
+            customPrice: true,
+            desc: 'Tailored sovereign cloud or on-premises deployment for large school networks.',
+            features: [
+              'Unlimited Campuses & Students',
+              'Dedicated Private Sovereign Cloud',
+              'Custom Ministry & Board Compliance',
+              'Bespoke Localized AI Models',
+              '24/7 Dedicated Senior Engineering Team'
+            ],
+            ctaText: 'Request Institutional RFP →',
+            ctaHref: '/contact',
+            highlighted: false,
+          })
+
+          setDynamicPlans(mapped)
+        }
+      })
+      .catch(err => console.warn('Could not fetch backend plans, using defaults:', err))
+  }, [])
+
+  const defaultPlans = [
     {
       key: 'starter',
       eyebrow: 'STARTER CAMPUS',
@@ -758,6 +809,8 @@ function PricingPage() {
       highlighted: false,
     }
   ]
+
+  const plans = dynamicPlans.length > 0 ? dynamicPlans : defaultPlans
 
   return (
     <Layout>
@@ -999,6 +1052,90 @@ function CheckoutSuccessPage() {
                 <span className="status-dot"></span> PAID &amp; VERIFIED
               </div>
             </div>
+
+            {invoice.admin_credentials && (
+              <div style={{
+                background: '#F0FDF4',
+                border: '1.5px solid #86EFAC',
+                borderRadius: '12px',
+                padding: '20px',
+                margin: '20px 0',
+                textAlign: 'left'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '26px' }}>🎉</span>
+                  <div>
+                    <h3 style={{ margin: 0, color: '#166534', fontSize: '16px', fontWeight: 800 }}>
+                      School Administrator Account Provisioned &amp; Activated!
+                    </h3>
+                    <p style={{ margin: '2px 0 0', color: '#15803D', fontSize: '12px' }}>
+                      Your campus subscription is live. Log in with the credentials generated below:
+                    </p>
+                  </div>
+                </div>
+
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+                  gap: '12px',
+                  background: 'white',
+                  padding: '14px',
+                  borderRadius: '8px',
+                  border: '1px solid #BBF7D0',
+                  marginBottom: '14px'
+                }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Admin Username
+                    </label>
+                    <code style={{ fontSize: '14px', fontWeight: 800, color: '#0F172A' }}>
+                      {invoice.admin_credentials.username}
+                    </code>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Admin Email
+                    </label>
+                    <span style={{ fontSize: '13px', fontWeight: 600, color: '#0F172A' }}>
+                      {invoice.admin_credentials.email}
+                    </span>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Password
+                    </label>
+                    <code style={{ fontSize: '14px', fontWeight: 800, color: '#0B63B6', background: '#EFF6FF', padding: '2px 8px', borderRadius: '4px' }}>
+                      {invoice.admin_credentials.password}
+                    </code>
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#64748B', fontWeight: 700, textTransform: 'uppercase' }}>
+                      Assigned Role
+                    </label>
+                    <span style={{ fontSize: '11px', background: '#DCFCE7', color: '#166534', padding: '3px 8px', borderRadius: '4px', fontWeight: 700 }}>
+                      {invoice.admin_credentials.role}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <a
+                    href={`/login`}
+                    className="local-button"
+                    style={{ background: '#16A34A', border: 'none', padding: '10px 18px', color: 'white', fontWeight: 700, textDecoration: 'none', borderRadius: '6px', fontSize: '13px' }}
+                  >
+                    🚀 Sign In to School Admin Portal →
+                  </a>
+                  <a
+                    href="http://localhost:4000/"
+                    className="local-button"
+                    style={{ background: '#0B63B6', border: 'none', padding: '10px 18px', color: 'white', fontWeight: 700, textDecoration: 'none', borderRadius: '6px', fontSize: '13px' }}
+                  >
+                    Launch EduCore Direct (Port 4000) ↗
+                  </a>
+                </div>
+              </div>
+            )}
 
             <div className="receipt-meta-grid">
               <div className="meta-block">
