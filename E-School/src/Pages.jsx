@@ -135,18 +135,281 @@ function Layout({ children }) {
 }
 
 function ContactForm({ type = 'contact' }) {
-  const [sent, setSent] = useState(false)
-  const isAccount = type === 'signup' || type === 'login'
+  const isLogin = type === 'login'
+  const isSignup = type === 'signup'
+
+  // Login State
+  const [identifier, setIdentifier] = useState('')
+  const [password, setPassword] = useState('')
+
+  // Signup / Contact State
+  const [schoolName, setSchoolName] = useState('')
+  const [contactName, setContactName] = useState('')
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [role, setRole] = useState('School Administrator / Principal')
+  const [requirements, setRequirements] = useState('')
+
+  // Submission State
+  const [loading, setLoading] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
+  const [successData, setSuccessData] = useState(null)
+
+  const handleQuickFill = (u, p) => {
+    setIdentifier(u)
+    setPassword(p)
+    setErrorMsg('')
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrorMsg('')
+
+    if (isLogin) {
+      try {
+        const res = await fetch('/api/auth/login/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify({
+            username: identifier.trim(),
+            password: password.trim()
+          })
+        })
+
+        const data = await res.json()
+        if (!res.ok || !data.user) {
+          throw new Error(data.detail || data.error || 'Invalid username or password.')
+        }
+
+        try {
+          localStorage.setItem('educore_user', JSON.stringify(data.user))
+        } catch {
+          // ignore localStorage issues in private windows
+        }
+        setSuccessData(data.user)
+
+        // Automatically open the authenticated EduCore workspace on port 4000
+        setTimeout(() => {
+          window.location.href = 'http://localhost:4000/'
+        }, 1800)
+      } catch (err) {
+        console.error('Login error:', err)
+        setErrorMsg(err.message || 'Cannot connect to authentication service. Ensure backend is running.')
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      // Demo / Contact Registration
+      try {
+        const payload = {
+          student_name: isSignup ? `Campus Pilot: ${schoolName.trim() || 'New School'}` : `General Campus Inquiry: ${contactName.trim() || 'Visitor'}`,
+          parent_name: contactName.trim() || schoolName.trim() || 'Campus Administrator',
+          parent_email: email.trim(),
+          parent_phone: phone.trim() || '0300 1234567',
+          submission_type: 'ONLINE_PUBLIC_FORM',
+          notes: isSignup 
+            ? `Institutional Demo Request | Role: ${role} | Requirements: ${requirements}`
+            : `Contact Inquiry: ${requirements}`
+        }
+
+        const res = await fetch('/api/assessments/registrations/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        })
+
+        const data = await res.json()
+        if (!res.ok) {
+          throw new Error(data.error || 'Failed to submit inquiry to server.')
+        }
+
+        setSuccessData(data)
+      } catch (err) {
+        console.error('Registration error:', err)
+        setErrorMsg(err.message || 'Could not submit inquiry. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    }
+  }
+
+  if (successData) {
+    if (isLogin) {
+      return (
+        <div className="local-form">
+          <div className="form-alert-success" role="alert">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <span style={{ fontSize: '20px' }}>✓</span>
+              <strong>Welcome, {successData.full_name || successData.username}!</strong>
+            </div>
+            <p style={{ margin: '0 0 10px', fontSize: '13px' }}>
+              Role: <strong>{successData.role}</strong> • Institution: <strong>{successData.school_name || 'NovuLabs Flagship Academy'}</strong>
+            </p>
+            <p style={{ margin: '0 0 14px', fontSize: '12px', color: '#15803D' }}>
+              Your credentials are authenticated. Launching your EduCore Workspace...
+            </p>
+            <a href="http://localhost:4000/" className="workspace-launch-btn">
+              🚀 Enter EduCore Workspace Now →
+            </a>
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="local-form">
+        <div className="form-alert-success" role="alert">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+            <span style={{ fontSize: '20px' }}>✓</span>
+            <strong>{isSignup ? 'Campus Pilot Request Received!' : 'Inquiry Sent!'} (Ref #{successData.id})</strong>
+          </div>
+          <p style={{ margin: '0 0 10px', fontSize: '13px' }}>
+            Thank you, <strong>{contactName || schoolName || 'Partner'}</strong>. Your request has been recorded in the central NovuLabs EduCore system.
+          </p>
+          <p style={{ margin: 0, fontSize: '12px', color: '#15803D' }}>
+            Our engineering team has received your submission and will contact you via WhatsApp / email.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <form className="local-form" onSubmit={e => { e.preventDefault(); setSent(true) }}>
-      {type === 'signup' && <label>School / Campus Name<input required placeholder="e.g. Crescent International School"/></label>}
-      {type === 'contact' && <label>Your Name<input required placeholder="Principal / Administrator Name"/></label>}
-      <label>Email Address<input required type="email" placeholder="principal@school.edu"/></label>
-      {type === 'login' && <label>Password<input required type="password" placeholder="Enter password" minLength="6"/></label>}
-      {type === 'signup' && (
-        <label>Your Role
-          <select defaultValue="">
-            <option value="" disabled>Select role</option>
+    <form className="local-form" onSubmit={handleSubmit}>
+      {isLogin && (
+        <div className="login-demo-container">
+          <div className="login-demo-title">
+            <span>⚡ Quick Demo Credentials (1-Click Fill)</span>
+          </div>
+          <div className="login-demo-chips">
+            <button
+              type="button"
+              className="login-demo-chip"
+              onClick={() => handleQuickFill('admin', 'adminpassword')}
+            >
+              👑 Admin (Principal / SuperAdmin)
+            </button>
+            <button
+              type="button"
+              className="login-demo-chip"
+              onClick={() => handleQuickFill('teacher_ahmed', 'teacher123')}
+            >
+              👨‍🏫 Teacher Cockpit
+            </button>
+            <button
+              type="button"
+              className="login-demo-chip"
+              onClick={() => handleQuickFill('parent_ahmed', 'parent123')}
+            >
+              👨‍👩‍👧 Parent Portal
+            </button>
+            <button
+              type="button"
+              className="login-demo-chip"
+              onClick={() => handleQuickFill('student1', 'student123')}
+            >
+              🎓 Student Hub
+            </button>
+          </div>
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="form-alert-error" role="alert">
+          <span>⚠️</span>
+          <span>{errorMsg}</span>
+        </div>
+      )}
+
+      {isSignup && (
+        <label>
+          School / Campus Name *
+          <input
+            required
+            type="text"
+            placeholder="e.g. Crescent International School"
+            value={schoolName}
+            onChange={(e) => setSchoolName(e.target.value)}
+          />
+        </label>
+      )}
+
+      {(type === 'contact' || isSignup) && (
+        <label>
+          {isSignup ? 'Principal / Administrator Contact Name *' : 'Your Name *'}
+          <input
+            required
+            type="text"
+            placeholder="e.g. Dr. Tariq Mahmood"
+            value={contactName}
+            onChange={(e) => setContactName(e.target.value)}
+          />
+        </label>
+      )}
+
+      {isLogin ? (
+        <label>
+          Username or Institutional Email *
+          <input
+            required
+            type="text"
+            placeholder="admin or admin@educore.edu.pk"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+          />
+        </label>
+      ) : (
+        <label>
+          Work Email Address *
+          <input
+            required
+            type="email"
+            placeholder="principal@school.edu.pk"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </label>
+      )}
+
+      {(type === 'contact' || isSignup) && (
+        <label>
+          Phone / WhatsApp *
+          <input
+            required
+            type="tel"
+            placeholder="0300 1234567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </label>
+      )}
+
+      {isLogin && (
+        <label>
+          Password *
+          <input
+            required
+            type="password"
+            placeholder="Enter password"
+            minLength="4"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </label>
+      )}
+
+      {isSignup && (
+        <label>
+          Your Role
+          <select value={role} onChange={(e) => setRole(e.target.value)}>
             <option>School Administrator / Principal</option>
             <option>Academic Director / Coordinator</option>
             <option>Faculty / Teacher</option>
@@ -154,19 +417,29 @@ function ContactForm({ type = 'contact' }) {
           </select>
         </label>
       )}
-      {type === 'contact' && (
-        <label>Campus Requirements
-          <textarea required placeholder="Tell us about your campus size, curricula (Cambridge/National), and key goals." rows="4"/>
+
+      {(type === 'contact' || isSignup) && (
+        <label>
+          {isSignup ? 'Campus Scope & Goals' : 'Message / Questions'}
+          <textarea
+            required
+            placeholder={isSignup ? "e.g. 500 students, Cambridge O/A-Levels, interested in Biometric Attendance and AI Exams." : "How can we help your institution?"}
+            rows="3"
+            value={requirements}
+            onChange={(e) => setRequirements(e.target.value)}
+          />
         </label>
       )}
-      <button className="local-button" type="submit">
-        {type === 'login' ? 'Sign In to Portal' : type === 'signup' ? 'Request Institutional Demo' : 'Send Message'} <span>→</span>
+
+      <button className="local-button" type="submit" disabled={loading}>
+        {loading
+          ? (isLogin ? 'Authenticating...' : 'Submitting to EduCore...')
+          : (isLogin ? 'Sign In to Portal' : isSignup ? 'Request Institutional Demo' : 'Send Message')} <span>→</span>
       </button>
-      {sent && (
+
+      {isLogin && (
         <p className="form-note">
-          {isAccount
-            ? 'Thank you! Your institutional demo request has been received. A NovuLabs EduCore specialist will contact you shortly.'
-            : 'Thank you! Your inquiry has been sent to our campus engineering team.'}
+          🔒 Secure 256-Bit SSL cookie authentication direct to Django backend.
         </p>
       )}
     </form>
@@ -801,8 +1074,11 @@ function CheckoutSuccessPage() {
               <button type="button" className="local-button print-btn" onClick={() => window.print()}>
                 🖨️ Print / Save PDF Invoice
               </button>
-              <a className="local-button portal-btn" href="/products/basic">
-                🚀 Proceed to Admin Portal →
+              <a className="local-button portal-btn" href="/login">
+                🚀 Log In to School Admin Workspace →
+              </a>
+              <a className="text-link" href="http://localhost:4000/">
+                Launch EduCore Portal Direct (Port 4000) ↗
               </a>
               <a className="text-link" href="/">
                 ← Return to Homepage

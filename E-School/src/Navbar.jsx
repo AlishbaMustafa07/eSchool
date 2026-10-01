@@ -11,6 +11,25 @@ export function Brand({ footer = false }) {
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem('educore_user')
+      return stored ? JSON.parse(stored) : null
+    } catch {
+      return null
+    }
+  })
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout/', { method: 'POST', credentials: 'include' })
+    } catch (e) {
+      console.warn('Logout warning:', e)
+    }
+    localStorage.removeItem('educore_user')
+    setUser(null)
+    window.location.href = '/'
+  }
 
   return (
     <header className="site-header">
@@ -57,8 +76,25 @@ export default function Navbar() {
               <a href="/contact">Schedule Campus Demo</a>
             </div>
           </div>
-          <a className="login-link" href="/login">Portal Login</a>
-          <a className="button button-nav" href="/signup">Book a Demo <span>→</span></a>
+          {user ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <a className="login-link" href="http://localhost:4000/" title={`Logged in as ${user.username} (${user.role})`}>
+                👤 {user.full_name || user.username} <span style={{ fontSize: '11px', background: '#E0F2FE', color: '#0369A1', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>{user.role}</span>
+              </a>
+              <button
+                type="button"
+                onClick={handleLogout}
+                style={{ background: 'none', border: '1px solid #CBD5E1', borderRadius: '6px', padding: '4px 8px', fontSize: '12px', color: '#64748B', cursor: 'pointer' }}
+              >
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <>
+              <a className="login-link" href="/login">Portal Login</a>
+              <a className="button button-nav" href="/signup">Book a Demo <span>→</span></a>
+            </>
+          )}
         </nav>
       </div>
     </header>
